@@ -79,6 +79,21 @@ var timer = 0;
 var min = 25;
 var yMovement = 6;
 var xMovement = 5;
+
+var menu = 1;
+var game = 2;
+var lose = 3;
+var state = menu;
+
+var startButton = new WebImage("http://www.clker.com/cliparts/5/r/I/j/O/k/another-green-start-button-md.png");
+startButton.setSize(100, 100);
+startButton.setPosition((getWidth() - startButton.getWidth()) / 2, (getHeight() - startButton.getHeight()) / 2);
+
+var menuButton = new WebImage("http://www.clker.com/cliparts/X/k/J/Q/r/p/menu-button-md.png");
+menuButton.setSize(100, 100);
+menuButton.setPosition(startButton.getX(), getHeight() - menuButton.getHeight());
+
+
 // arcs normally just return false because this is not implemented
 Arc.prototype.containsPoint = function(x, y) {
     var dx = x - this.getX();
@@ -119,6 +134,13 @@ function Sound(url, numChannels) {
 }
 
 function start() {
+    add(startButton);
+    mouseMoveMethod(mouseMove);
+    mouseDownMethod(mouseDown);
+    keyDownMethod(keyDown);
+}
+
+function startGame() {
     line1 = drawLine(0, 0, 0, 0, lineW, true);
     line2 = drawLine(0, 0, 0, 0, lineW, true);
     bullet = drawCircle(-100, -100, BULLET_RADIUS, Color.black, true);
@@ -127,9 +149,7 @@ function start() {
     
     setTimer(onTick, DELAY);
     
-    mouseMoveMethod(mouseMove);
-    mouseDownMethod(mouseDown);
-    keyDownMethod(keyDown);
+    
     hud();
     
     gameOver = new Text("Game Over", "30pt Cooper Black");
@@ -139,25 +159,27 @@ function start() {
 }
 
 function keyDown(e) {
-    if (e.keyCode == Keyboard.letter('Q')) {
-        min = 10;
-        println("You have activated cheats.");
-        println("You can spam click.");
-        println("Be careful though.");
-    }
-    if (e.keyCode == Keyboard.letter('P')) {
-        yMovement = 2;
-        xMovement = 2;
-        println("You have activated cheats.");
-        println("Bird is now slower.");
-    }
-    if (e.keyCode == Keyboard.letter('W')) {
-        jeff.play();
-        println("My name is Jeff.");
-    }
-    if (e.keyCode == Keyboard.letter('O')) {
-        greenBeans.play();
-        println("Green Beans.");
+    if (state == game) {
+        if (e.keyCode == Keyboard.letter('Q')) {
+            min = 10;
+            println("You have activated cheats.");
+            println("You can spam click.");
+            println("Be careful though.");
+        }
+        if (e.keyCode == Keyboard.letter('P')) {
+            yMovement = 2;
+            xMovement = 2;
+            println("You have activated cheats.");
+            println("Bird is now slower.");
+        }
+        if (e.keyCode == Keyboard.letter('W')) {
+            jeff.play();
+            println("My name is Jeff.");
+        }
+        if (e.keyCode == Keyboard.letter('O')) {
+            greenBeans.play();
+            println("Green Beans.");
+        }
     }
 }
 
@@ -176,10 +198,12 @@ function hud() {
 }
 
 function mouseMove(e) {
-    line1.setPosition(0, e.getY());
-    line1.setEndpoint(getWidth(), e.getY());
-    line2.setPosition(e.getX(), 0);
-    line2.setEndpoint(e.getX(), getHeight());
+    if (state == game) {
+        line1.setPosition(0, e.getY());
+        line1.setEndpoint(getWidth(), e.getY());
+        line2.setPosition(e.getX(), 0);
+        line2.setEndpoint(e.getX(), getHeight());
+    }
 }
 
 function drawLine(x1, y1, x2, y2, width, returnYN) {
@@ -192,26 +216,49 @@ function drawLine(x1, y1, x2, y2, width, returnYN) {
 }
 
 function mouseDown(e) {
-    if (timer >= min) {
-        SHOOT_SOUND.play();
-        RELOAD_SOUND.play();
-        
-        var elem = getElementAt(e.getX(), e.getY());
-        if (elem != null && (elem == bird || elem == birdHead)) {
-            bullet.setColor(Color.red);
-            bullet.setPosition(e.getX(), e.getY());
-            bird.setPosition(-20, Randomizer.nextInt(20, getHeight() - 20));
-            kills++;
-            killsText.setText("Kills: " + kills);
-        } else {
-            bullet.setColor(Color.black);
-            bullet.setPosition(e.getX(), e.getY());
+    var elem = getElementAt(e.getX(), e.getY());
+    if (state == game) {
+        if (timer >= min) {
+            SHOOT_SOUND.play();
+            RELOAD_SOUND.play();
+            
+            
+            if (elem != null && (elem == bird || elem == birdHead)) {
+                bullet.setColor(Color.red);
+                bullet.setPosition(e.getX(), e.getY());
+                bird.setPosition(-20, Randomizer.nextInt(20, getHeight() - 20));
+                kills++;
+                killsText.setText("Kills: " + kills);
+            } else {
+                bullet.setColor(Color.black);
+                bullet.setPosition(e.getX(), e.getY());
+            }
+            numShots++;
+            acc = Math.floor(kills / numShots * 100);
+            //println(acc);
+            accText.setText("Accuracy: " + acc + "%");
+            timer = 0;
         }
-        numShots++;
-        acc = Math.floor(kills / numShots * 100);
-        //println(acc);
-        accText.setText("Accuracy: " + acc + "%");
-        timer = 0;
+    } else if (state == menu) {
+        if (elem == startButton) {
+            startGame();
+            remove(startButton);
+            state = game;
+        }
+    } else if (state == lose) {
+        if (elem == menuButton) {
+            remove(menuButton);
+            remove(gameOver);
+            remove(baseScoreText);
+            remove(accBonusText);
+            remove(tScoreText);
+            remove(killsText);
+            remove(timeText);
+            remove(accText);
+            
+            state = menu;
+            add(startButton);
+        }
     }
 }
 
@@ -246,9 +293,9 @@ function perSecond() {
         remove(birdHead);
         remove(bullet);
         
-        mouseMoveMethod(nothing);
-        mouseDownMethod(nothing);
-        keyDownMethod(nothing);
+        //mouseMoveMethod(nothing);
+        //mouseDownMethod(nothing);
+       // keyDownMethod(nothing);
         
         baseScore = kills * 100;
         if (acc >= 50) {
@@ -268,7 +315,8 @@ function perSecond() {
         add(baseScoreText);
         add(accBonusText);
         add(tScoreText);
-    
+        add(menuButton);
+        state = lose;
     }
 }
 
