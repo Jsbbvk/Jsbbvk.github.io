@@ -1,0 +1,286 @@
+
+<html>
+<head>
+<title>Duck Hunt</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<script type="text/javascript" src="https://static.codehs.com/gulp/51db8fa529759b01c32fd7107985cc49664a96c9/chs-js-lib/chs.js"></script>
+
+
+<style>
+canvas {
+    border: 1px solid black;
+    display: inline-block;
+    vertical-align: top;
+}
+
+pre {
+    border: 1px solid black;
+    display: inline-block;
+    width: 400px;
+    height: 500px;
+    background-color: #F5F5F5;
+}
+</style>
+
+</head>
+
+<body>
+<h1>Duck Hunt</h1>
+
+
+
+<canvas
+width="400"
+height="500"
+class="codehs-editor-canvas"></canvas>
+<pre id="console"></pre>
+
+<script>
+window.onload = function() {
+
+    var RELOAD_SOUND = new Sound("https://dl.dropboxusercontent.com/s/f7r0jea1n9g21ys/shotgunReload.mp3");
+var SHOOT_SOUND = new Sound("https://dl.dropboxusercontent.com/s/mjdoiz3w6ibtir1/shotGunBlast.mp3");
+var jeff = new Sound("https://dl.dropboxusercontent.com/s/ih3kzsltxwtmgeg/My%20Name%20Is%20Jeff%20Sound%20Effect.mp3.wav");
+var greenBeans = new Sound("https://dl.dropboxusercontent.com/s/my66q5u925s1bk7/Grandma%20Thanksgiving%20Rap%20Song%20Beans%20Greens%20Potatoes%20Tomatoes%20%23UNameItChallenge.mp3");
+setBackgroundColor(new Color(89, 148, 242));
+var line1; 
+var line2;
+var lineW = 2;
+
+var bullet;
+var BULLET_RADIUS = 4;
+
+var bird;
+var birdHead;
+var BIRD_RADIUS = 20;
+var BIRDHEAD_RADIUS = BIRD_RADIUS / 2;
+
+var time = 10;
+var timeText;
+var kills = 0;
+var killsText;
+var acc = 100;
+var accText;
+var numShots = 0;
+
+var gameOver;
+var baseScore = 0;
+var baseScoreText;
+var accBonus = 0;
+var accBonusText;
+var tScore = 0;
+var tScoreText;
+var OFFSET = 20;
+
+var DELAY = 20;
+var timer = 0;
+var min = 25;
+var yMovement = 6;
+var xMovement = 5;
+// arcs normally just return false because this is not implemented
+Arc.prototype.containsPoint = function(x, y) {
+    var dx = x - this.getX();
+    var dy = y - this.getY();
+    var angle = Math.atan2(-dy, dx);
+    if (angle < 0) angle += 2 * Math.PI;
+    var startAngle = this.startAngle;
+    var endAngle = this.endAngle;
+    while (endAngle < 0) endAngle += 2 * Math.PI;
+    while (endAngle > 2 * Math.PI) endAngle -= 2 * Math.PI;
+    while (startAngle < 0) startAngle += 2 * Math.PI;
+    while (startAngle > 2 * Math.PI) startAngle -= 2 * Math.PI;
+    
+    var angleInRange = false;
+    if (startAngle > endAngle) {
+        angleInRange = angle >= startAngle || angle <= endAngle;
+    } else {
+        angleInRange = angle >= startAngle && angle <= endAngle;
+    }
+    return angleInRange && dx * dx + dy * dy <= this.radius * this.radius;
+};
+
+function Sound(url, numChannels) {
+    
+    numChannels = numChannels || 10;
+    this.channels = [];
+    for (var i = 0; i < numChannels; i++) {
+        this.channels.push(new Audio(url));
+    }
+    this.currentChannel = 0;
+    this.play = function() {
+        this.channels[this.currentChannel].play();
+        this.currentChannel++;
+        if (this.currentChannel == this.channels.length) {
+            this.currentChannel = 0;
+        }
+    };
+}
+
+function start() {
+    line1 = drawLine(0, 0, 0, 0, lineW, true);
+    line2 = drawLine(0, 0, 0, 0, lineW, true);
+    bullet = drawCircle(-100, -100, BULLET_RADIUS, Color.black, true);
+    bird = drawCircle(-20, Randomizer.nextInt(20, getHeight() - 20), BIRD_RADIUS, Color.green, true);
+    birdHead = drawCircle(bird.getX() +  BIRD_RADIUS + BIRDHEAD_RADIUS, bird.getY(), BIRDHEAD_RADIUS, Color.red, true);
+    
+    setTimer(onTick, DELAY);
+    
+    mouseMoveMethod(mouseMove);
+    mouseDownMethod(mouseDown);
+    keyDownMethod(keyDown);
+    hud();
+    
+    gameOver = new Text("Game Over", "30pt Cooper Black");
+    gameOver.setPosition((getWidth() - gameOver.getWidth()) / 2, (getHeight() - gameOver.getHeight()) / 2);
+    
+    keyDownMethod(keyDown);
+}
+
+function keyDown(e) {
+    if (e.keyCode == Keyboard.letter('Q')) {
+        min = 10;
+        println("You have activated cheats.");
+        println("You can spam click.");
+        println("Be careful though.");
+    }
+    if (e.keyCode == Keyboard.letter('P')) {
+        yMovement = 2;
+        xMovement = 2;
+        println("You have activated cheats.");
+        println("Bird is now slower.");
+    }
+    if (e.keyCode == Keyboard.letter('W')) {
+        jeff.play();
+        println("My name is Jeff.");
+    }
+    if (e.keyCode == Keyboard.letter('O')) {
+        greenBeans.play();
+        println("Green Beans.");
+    }
+}
+
+function hud() {
+    timeText = new Text("Time: " + time, "15pt Arial");
+    killsText = new Text("Kills: " + kills, "15pt Arial");
+    accText = new Text("Accuracy: " + acc + "%", "15pt Arial");
+    timeText.setPosition(getWidth() / 2 - timeText.getWidth() / 2, timeText.getHeight());
+    killsText.setPosition(getWidth() - killsText.getWidth() / 2 * 3, killsText.getHeight());
+    accText.setPosition(0, accText.getHeight());
+    
+    add(killsText);
+    add(timeText);
+    add(accText);
+    setTimer(perSecond, 1000);
+}
+
+function mouseMove(e) {
+    line1.setPosition(0, e.getY());
+    line1.setEndpoint(getWidth(), e.getY());
+    line2.setPosition(e.getX(), 0);
+    line2.setEndpoint(e.getX(), getHeight());
+}
+
+function drawLine(x1, y1, x2, y2, width, returnYN) {
+    var l = new Line(x1, y1, x2, y2);
+    l.setLineWidth(width);
+    add(l);
+    if (returnYN) {
+        return l;
+    }
+}
+
+function mouseDown(e) {
+    if (timer >= min) {
+        SHOOT_SOUND.play();
+        RELOAD_SOUND.play();
+        
+        var elem = getElementAt(e.getX(), e.getY());
+        if (elem != null && (elem == bird || elem == birdHead)) {
+            bullet.setColor(Color.red);
+            bullet.setPosition(e.getX(), e.getY());
+            bird.setPosition(-20, Randomizer.nextInt(20, getHeight() - 20));
+            kills++;
+            killsText.setText("Kills: " + kills);
+        } else {
+            bullet.setColor(Color.black);
+            bullet.setPosition(e.getX(), e.getY());
+        }
+        numShots++;
+        acc = Math.floor(kills / numShots * 100);
+        //println(acc);
+        accText.setText("Accuracy: " + acc + "%");
+        timer = 0;
+    }
+}
+
+function drawCircle(x, y, radius, color, returnYN) {
+    var c = new Circle(radius);
+    c.setPosition(x, y);
+    c.setColor(color);
+    add(c);
+    if (returnYN) {
+        return c;
+    }
+}
+
+function onTick() {
+    bird.move(xMovement, Randomizer.nextInt(yMovement, -yMovement))
+    birdHead.setPosition(bird.getX() + BIRD_RADIUS + BIRDHEAD_RADIUS, bird.getY());
+    if (bird.getX() >= getWidth()) {
+        bird.setPosition(-20, Randomizer.nextInt(40 , getHeight() - 40));
+    }
+    timer++;
+}
+
+function perSecond() {
+    time--;
+    timeText.setText("Time: " + time);
+    if (time == 0) {
+        stopTimer(onTick);
+        stopTimer(perSecond);
+        remove(bird);
+        remove(line1);
+        remove(line2);
+        remove(birdHead);
+        remove(bullet);
+        
+        mouseMoveMethod(nothing);
+        mouseDownMethod(nothing);
+        keyDownMethod(nothing);
+        
+        baseScore = kills * 100;
+        if (acc >= 50) {
+            accBonus = Math.floor(kills * Math.pow(acc - 50, 1.5));
+        }
+        tScore = baseScore + accBonus;
+        
+        baseScoreText = new Text("Base Score: " + baseScore, "20pt Cooper Black");
+        accBonusText = new Text("Accuracy Bonus: " + accBonus, "20pt Cooper Black");
+        tScoreText = new Text("Total Score: " + tScore, "20pt Cooper Black");
+        baseScoreText.setPosition((getWidth() - baseScoreText.getWidth()) / 2, gameOver.getY() + baseScoreText.getHeight() + OFFSET);
+        accBonusText.setPosition((getWidth() - accBonusText.getWidth()) / 2, baseScoreText.getY() + accBonusText.getHeight() + OFFSET);
+        tScoreText.setPosition((getWidth() - tScoreText.getWidth()) / 2, accBonusText.getY() + tScoreText.getHeight() + OFFSET);
+        
+        
+        add(gameOver);
+        add(baseScoreText);
+        add(accBonusText);
+        add(tScoreText);
+    
+    }
+}
+
+function nothing() {}
+
+
+
+    if (typeof start === 'function') {
+        start();
+    }
+};
+</script>
+
+</body>
+</html>
