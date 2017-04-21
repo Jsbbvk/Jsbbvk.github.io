@@ -1,11 +1,11 @@
 
 <html>
 <head>
-<title>Shooting Game</title>
+<title>Duck Hunt</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
-<script type="text/javascript" src="https://static.codehs.com/gulp/51db8fa529759b01c32fd7107985cc49664a96c9/chs-js-lib/chs.js"></script>
+<script type="text/javascript" src="https://static.codehs.com/gulp/88e82659c12eab68e6477fe603ce0bf33cbd6f18/chs-js-lib/chs.js"></script>
 
 
 <style>
@@ -19,7 +19,7 @@ pre {
     border: 1px solid black;
     display: inline-block;
     width: 400px;
-    height: 500px;
+    height: 100px;
     background-color: #F5F5F5;
 }
 </style>
@@ -35,7 +35,7 @@ pre {
 width="400"
 height="500"
 class="codehs-editor-canvas"></canvas>
-<!--<pre id="console"></pre>-->
+<pre id="console"></pre>
 
 <script>
 window.onload = function() {
@@ -83,17 +83,34 @@ var xMovement = 5;
 var menu = 1;
 var game = 2;
 var lose = 3;
+var info = 4;
 var state = menu;
 
 var startButton = new WebImage("http://www.clker.com/cliparts/5/r/I/j/O/k/another-green-start-button-md.png");
 startButton.setSize(100, 100);
-startButton.setPosition((getWidth() - startButton.getWidth()) / 2, (getHeight() - startButton.getHeight()) / 2);
+startButton.setPosition((getWidth() - startButton.getWidth()) / 2, (getHeight() - startButton.getHeight()));
 
 var menuButton = new WebImage("http://www.clker.com/cliparts/X/k/J/Q/r/p/menu-button-md.png");
 menuButton.setSize(100, 100);
 menuButton.setPosition(startButton.getX(), getHeight() - menuButton.getHeight());
 
+var school = new WebImage("https://img.clipartfox.com/bed634b7da099f3253b62e4696967032_transparent-clipart-school-clipart-transparent_400-488.png");
+school.setSize(getWidth(), getHeight() / 4 * 3);
 
+var infoButton = new WebImage("https://i.stack.imgur.com/qOXqp.png");
+infoButton.setSize(50, 50);
+infoButton.setPosition(infoButton.getWidth() / 2, infoButton.getHeight() / 2);
+
+var infoTxt1 = new Text("You Are A Shooter", "30pt Arial");
+infoTxt1.setPosition((getWidth() - infoTxt1.getWidth()) / 2, getHeight() / 2 - infoTxt1.getHeight());
+
+var infoTxt2 = new Text("Shoot To Rack Up Your Score", "20pt Arial");
+infoTxt2.setPosition((getWidth() - infoTxt2.getWidth()) / 2, getHeight() / 2 + infoTxt2.getHeight());
+
+
+var child;
+
+var childSRCArr = ["http://wholechildleon.org/wp-content/uploads/2015/09/Education2.png", "http://static2.fjcdn.com/comments/I+didn+t+realize+that+autism+could+be+so+bad+that+_b12d7bd7ee5f5414036a2666203bfefa.png"];
 // arcs normally just return false because this is not implemented
 Arc.prototype.containsPoint = function(x, y) {
     var dx = x - this.getX();
@@ -135,18 +152,33 @@ function Sound(url, numChannels) {
 
 function start() {
     add(startButton);
+    add(school);
+    add(infoButton);
     mouseMoveMethod(mouseMove);
     mouseDownMethod(mouseDown);
     keyDownMethod(keyDown);
 }
 
 function startGame() {
+    time = 10;
+    kills = 0;
+    acc = 100;
+    numShots = 0;
+    min = 25;
+    yMovement = 6;
+    xMovement = 5;
+    
     line1 = drawLine(0, 0, 0, 0, lineW, true);
     line2 = drawLine(0, 0, 0, 0, lineW, true);
     bullet = drawCircle(-100, -100, BULLET_RADIUS, Color.black, true);
+    /*
     bird = drawCircle(-20, Randomizer.nextInt(20, getHeight() - 20), BIRD_RADIUS, Color.green, true);
     birdHead = drawCircle(bird.getX() +  BIRD_RADIUS + BIRDHEAD_RADIUS, bird.getY(), BIRDHEAD_RADIUS, Color.red, true);
-    
+    */
+    child = new WebImage(childSRCArr[Randomizer.nextInt(0, childSRCArr.length-1)]);
+    child.setSize(BIRD_RADIUS * 4 , BIRD_RADIUS * 4);
+    child.setPosition(-child.getWidth() *1.5, Randomizer.nextInt(child.getHeight() / 2, getHeight() - child.getHeight() * 1.5));
+    add(child);
     setTimer(onTick, DELAY);
     
     
@@ -223,10 +255,15 @@ function mouseDown(e) {
             RELOAD_SOUND.play();
             
             
-            if (elem != null && (elem == bird || elem == birdHead)) {
+            if (elem != null && (elem == child)) {
                 bullet.setColor(Color.red);
                 bullet.setPosition(e.getX(), e.getY());
-                bird.setPosition(-20, Randomizer.nextInt(20, getHeight() - 20));
+                
+                remove(child);
+                child = new WebImage(childSRCArr[Randomizer.nextInt(0, childSRCArr.length-1)]);
+                child.setSize(BIRD_RADIUS * 4, BIRD_RADIUS * 4);
+                child.setPosition(-child.getWidth() * 1.5, Randomizer.nextInt(child.getHeight() / 2, getHeight() - child.getHeight() / 1.5));
+                add(child);
                 kills++;
                 killsText.setText("Kills: " + kills);
             } else {
@@ -243,7 +280,15 @@ function mouseDown(e) {
         if (elem == startButton) {
             startGame();
             remove(startButton);
+            remove(school);
+            remove(infoButton);
             state = game;
+        } else if (elem == infoButton) {
+            remove(school);
+            remove(infoButton);
+            add(infoTxt1);
+            add(infoTxt2);
+            state = info;
         }
     } else if (state == lose) {
         if (elem == menuButton) {
@@ -258,6 +303,15 @@ function mouseDown(e) {
             
             state = menu;
             add(startButton);
+            add(school);
+            add(infoButton);
+            
+        }
+    } else if (state == info) {
+        if (elem == startButton) {
+            state = game;
+            removeAll();
+            startGame();
         }
     }
 }
@@ -273,10 +327,19 @@ function drawCircle(x, y, radius, color, returnYN) {
 }
 
 function onTick() {
+    /*
     bird.move(xMovement, Randomizer.nextInt(yMovement, -yMovement))
     birdHead.setPosition(bird.getX() + BIRD_RADIUS + BIRDHEAD_RADIUS, bird.getY());
     if (bird.getX() >= getWidth()) {
         bird.setPosition(-20, Randomizer.nextInt(40 , getHeight() - 40));
+    }*/
+    child.move(xMovement, Randomizer.nextInt(yMovement, -yMovement));
+    if (child.getX() >= getWidth()) {
+        remove(child);
+        child = new WebImage(childSRCArr[Randomizer.nextInt(0, childSRCArr.length-1)]);
+        child.setSize(BIRD_RADIUS * 4, BIRD_RADIUS * 4);
+        child.setPosition(-child.getWidth() * 1.5, Randomizer.nextInt(child.getHeight() / 2, getHeight() - child.getHeight() / 1.5));
+        add(child);
     }
     timer++;
 }
@@ -287,12 +350,12 @@ function perSecond() {
     if (time == 0) {
         stopTimer(onTick);
         stopTimer(perSecond);
-        remove(bird);
+       
         remove(line1);
         remove(line2);
-        remove(birdHead);
-        remove(bullet);
         
+        remove(bullet);
+        remove(child);
         //mouseMoveMethod(nothing);
         //mouseDownMethod(nothing);
        // keyDownMethod(nothing);
