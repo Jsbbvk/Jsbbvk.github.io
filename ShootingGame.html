@@ -1,7 +1,7 @@
 
 <html>
 <head>
-<title>Duck Hunt</title>
+<title>CodeRed</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
@@ -27,7 +27,7 @@ pre {
 </head>
 
 <body>
-<h1>Duck Hunt</h1>
+<h1>CodeRed</h1>
 
 
 
@@ -43,14 +43,16 @@ window.onload = function() {
     var RELOAD_SOUND = new Sound("https://dl.dropboxusercontent.com/s/f7r0jea1n9g21ys/shotgunReload.mp3");
 var SHOOT_SOUND = new Sound("https://dl.dropboxusercontent.com/s/mjdoiz3w6ibtir1/shotGunBlast.mp3");
 var jeff = new Sound("https://dl.dropboxusercontent.com/s/ih3kzsltxwtmgeg/My%20Name%20Is%20Jeff%20Sound%20Effect.mp3.wav");
-var greenBeans = new Sound("https://dl.dropboxusercontent.com/s/my66q5u925s1bk7/Grandma%20Thanksgiving%20Rap%20Song%20Beans%20Greens%20Potatoes%20Tomatoes%20%23UNameItChallenge.mp3");
+var greenBeans = new Audio("https://dl.dropboxusercontent.com/s/my66q5u925s1bk7/Grandma%20Thanksgiving%20Rap%20Song%20Beans%20Greens%20Potatoes%20Tomatoes%20%23UNameItChallenge.mp3");
 setBackgroundColor(new Color(89, 148, 242));
 var line1; 
 var line2;
 var lineW = 2;
 
 var bullet;
-var BULLET_RADIUS = 4;
+var BULLET_RADIUS = 20;
+var bulletMissSRC = "http://www.clipartkid.com/images/316/bullet-shot-hole-png-image-bullet-shot-hole-png-image-S3Nv7g-clipart.png";
+var bulletHitSRC = "http://www.clipartkid.com/images/841/blood-splatter-png-viewing-gallery-sslQAH-clipart.png";
 
 var bird;
 var birdHead;
@@ -107,10 +109,13 @@ infoTxt1.setPosition((getWidth() - infoTxt1.getWidth()) / 2, getHeight() / 2 - i
 var infoTxt2 = new Text("Shoot To Rack Up Your Score", "20pt Arial");
 infoTxt2.setPosition((getWidth() - infoTxt2.getWidth()) / 2, getHeight() / 2 + infoTxt2.getHeight());
 
+var gameTitle = new Text("Code Red", "37pt Arial");
+gameTitle.setPosition((getWidth() - gameTitle.getWidth()) / 2, getHeight() / 2 + gameTitle.getWidth() / 9);
 
 var child;
-
-var childSRCArr = ["http://wholechildleon.org/wp-content/uploads/2015/09/Education2.png", "http://static2.fjcdn.com/comments/I+didn+t+realize+that+autism+could+be+so+bad+that+_b12d7bd7ee5f5414036a2666203bfefa.png"];
+var childSRCArr = ["http://wholechildleon.org/wp-content/uploads/2015/09/Education2.png", 
+                "http://static2.fjcdn.com/comments/I+didn+t+realize+that+autism+could+be+so+bad+that+_b12d7bd7ee5f5414036a2666203bfefa.png",
+                "http://i.imgur.com/iwBLFbN.png"];
 // arcs normally just return false because this is not implemented
 Arc.prototype.containsPoint = function(x, y) {
     var dx = x - this.getX();
@@ -154,9 +159,13 @@ function start() {
     add(startButton);
     add(school);
     add(infoButton);
+    add(gameTitle);
     mouseMoveMethod(mouseMove);
     mouseDownMethod(mouseDown);
     keyDownMethod(keyDown);
+    println("Welcome To Code Red!");
+    println("Press \"SPACE\" To Enter Secret Code");
+    
 }
 
 function startGame() {
@@ -170,7 +179,11 @@ function startGame() {
     
     line1 = drawLine(0, 0, 0, 0, lineW, true);
     line2 = drawLine(0, 0, 0, 0, lineW, true);
-    bullet = drawCircle(-100, -100, BULLET_RADIUS, Color.black, true);
+    //bullet = drawCircle(-100, -100, BULLET_RADIUS, Color.black, true);
+    bullet = new WebImage(bulletMissSRC);
+    bullet.setSize(BULLET_RADIUS * 3, BULLET_RADIUS * 3);
+    bullet.setPosition(-100, -100);
+    add(bullet);
     /*
     bird = drawCircle(-20, Randomizer.nextInt(20, getHeight() - 20), BIRD_RADIUS, Color.green, true);
     birdHead = drawCircle(bird.getX() +  BIRD_RADIUS + BIRDHEAD_RADIUS, bird.getY(), BIRDHEAD_RADIUS, Color.red, true);
@@ -191,26 +204,44 @@ function startGame() {
 }
 
 function keyDown(e) {
-    if (state == game) {
+    if (state == game) {/*
         if (e.keyCode == Keyboard.letter('Q')) {
-            min = 10;
-            println("You have activated cheats.");
-            println("You can spam click.");
-            println("Be careful though.");
+            
         }
         if (e.keyCode == Keyboard.letter('P')) {
-            yMovement = 2;
-            xMovement = 2;
-            println("You have activated cheats.");
-            println("Bird is now slower.");
+            
         }
         if (e.keyCode == Keyboard.letter('W')) {
-            jeff.play();
-            println("My name is Jeff.");
+            
         }
         if (e.keyCode == Keyboard.letter('O')) {
-            greenBeans.play();
-            println("Green Beans.");
+            
+        }*/
+    } else if (state == menu) {
+        if (e.keyCode == Keyboard.SPACE) {
+            var code = readLine("Enter Code (case sensitive): ");
+            println("*****************************************");
+            if (code == "slows") {
+                min = 10;
+                println("Cheat Successful!");
+                println("You activated SPAM CLICK");
+                //println("Be careful though.");
+            } else if (code == "spam") {
+                yMovement = 2;
+                xMovement = 2;
+                println("Cheat Successsful!");
+                println("Kids are now slower");
+            } else if (code == "jeff") {
+                
+                jeff.play();
+                println("My name is Jeff.");
+            } else if (code == "beans") {
+                greenBeans.play();
+                println("Green Beans.");
+            } else {
+                println("Nope... not a code ;)");
+            }
+            println("*****************************************");
         }
     }
 }
@@ -256,8 +287,13 @@ function mouseDown(e) {
             
             
             if (elem != null && (elem == child)) {
-                bullet.setColor(Color.red);
-                bullet.setPosition(e.getX(), e.getY());
+                
+                remove(bullet);
+                bullet = new WebImage(bulletHitSRC);
+                bullet.setSize(BULLET_RADIUS * 3, BULLET_RADIUS * 3);
+                bullet.setPosition(e.getX() - bullet.getWidth() / 2, e.getY() - bullet.getHeight() / 2);
+                add(bullet);
+                
                 
                 remove(child);
                 child = new WebImage(childSRCArr[Randomizer.nextInt(0, childSRCArr.length-1)]);
@@ -267,8 +303,11 @@ function mouseDown(e) {
                 kills++;
                 killsText.setText("Kills: " + kills);
             } else {
-                bullet.setColor(Color.black);
-                bullet.setPosition(e.getX(), e.getY());
+                remove(bullet);
+                bullet = new WebImage(bulletMissSRC);
+                bullet.setSize(BULLET_RADIUS * 3, BULLET_RADIUS * 3);
+                bullet.setPosition(e.getX() - bullet.getWidth() / 2, e.getY() - bullet.getHeight() / 2);
+                add(bullet);
             }
             numShots++;
             acc = Math.floor(kills / numShots * 100);
@@ -282,12 +321,14 @@ function mouseDown(e) {
             remove(startButton);
             remove(school);
             remove(infoButton);
+            remove(gameTitle);
             state = game;
         } else if (elem == infoButton) {
             remove(school);
             remove(infoButton);
             add(infoTxt1);
             add(infoTxt2);
+            remove(gameTitle);
             state = info;
         }
     } else if (state == lose) {
@@ -305,7 +346,7 @@ function mouseDown(e) {
             add(startButton);
             add(school);
             add(infoButton);
-            
+            add(gameTitle);
         }
     } else if (state == info) {
         if (elem == startButton) {
