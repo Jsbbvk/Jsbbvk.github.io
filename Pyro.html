@@ -20,6 +20,7 @@ pre {
 <script language="JavaScript">
 	var pause = false;
 	var shootable = !pause;
+	var enemyShootable = !pause;
 	var up = 1;
 	var down = 2;
 	var left = 3;
@@ -46,7 +47,8 @@ pre {
 
 	var enemyArr = [];
 	var enemySRC = "http://www.iconsdb.com/icons/preview/purple/circle-xxl.png";
-
+	var enemyShootChance = 70;
+	
 	var crosshair = new Image();
 	crosshair.src="http://www.clipartbest.com/cliparts/dT8/xBB/dT8xBBGTe.png";
 	crosshair.width = 20;
@@ -120,6 +122,10 @@ pre {
 	var bulShot = 0;
 	var bulDeleted = 0;
 
+	//events
+	var firstEnemy = true;
+	
+	
 	function start() {
 		onTick();
 		perSec();
@@ -169,21 +175,36 @@ pre {
 	
 		pause = true;
 		shootable = !pause;
+		enemyShootable = !pause;
 		printlnTimer("Welcome Pyro!     ",0, 100, function() {
 			printlnTimer("We've been expecting you for a long time.      ", 0, 100, function() {
 				printTimer("Let me introduce myself,", 0, 100, function() {
-					printlnTimer(" I am Oz the GREAT.", 0, 250);
+					printlnTimer(" I am Oz the GREAT.", 0, 250, function() {
+						spawnEnemy();
+						printlnTimer("Oh snap! A enemy!", 0, 50);
+						enemyShootable = true;
+						enemyShootChance = 70;
+					});
 				});
 			});
 		});
 	
+		
 		//spawnEnemy();
-		//spawnEnemy();
+	}
 	
-	
-	
-	
-	
+	function resumeChapterOne() {
+		firstEnemy = false;
+		printlnTimer("LOL u suck noob", 0, 100, function() {
+			enemyArr.splice(0, 1);
+			printlnTimer("Okay... Press Space and Shoot now LOL", 0, 110, function() {
+				pause = false;
+				shootable = !pause;
+				enemyShootable = !pause;
+				enemyShootChance = 40;
+				spawnEnemy();
+			});
+		});
 	}
 
 	class Enemy {
@@ -347,7 +368,7 @@ pre {
 		
 		var x = Math.floor((mainChar.x) / (mainImgRad*2));
 		var y = Math.floor((mainChar.y) / (mainImgRad*2));
-		println(x + " + " + y);
+		//println(x + " + " + y);
 		if (terrainBound[room][y][x] == 1) {
 			if (dir == up) {
 				mainChar.y += mainImgRad*2;
@@ -359,7 +380,7 @@ pre {
 				mainChar.x -= mainImgRad*2;
 			}
 		}
-		println(terrainBound[room][y][x]);
+		//println(terrainBound[room][y][x]);
 	}
 
 	function onTick() {
@@ -372,9 +393,10 @@ pre {
 	
 	function perSec() {
 		window.setTimeout(perSec, 1000);
-		
-		if (randomBool(40)) {
-			enemyShoot();
+		if (enemyShootable) {
+			if (randomBool(enemyShootChance)) {
+				enemyShoot();
+			}
 		}
 	}
 
@@ -476,7 +498,9 @@ pre {
 			} else if (bullet.shotFrom == enemyID) {
 				//if (isCollide(Math.ceil(bullet.x), Math.ceil(bullet.y), bullet.width, bullet.height, mainChar.x + mainImgRad, mainChar.y + mainImgRad, mainImgRad * 2, mainImgRad * 2)) {
 				if (RectCircleColliding(mainChar.x, mainChar.y, mainImgRad, Math.ceil(bullet.x), Math.ceil(bullet.y), bullet.width, bullet.height)) {
-					println("SHOT!");
+					if (firstEnemy) {
+						resumeChapterOne();
+					}
 					bulletArr.splice(i, 1);
 					i--;
 					//shot player
