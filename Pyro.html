@@ -290,7 +290,7 @@ pre {
 		doorMap["Fisher"] = fisher;
 		
 		var teleportToPlace = prompt("What section would you like to go to? Start, Mid, or Field? ");
-		if (teleportToPlace == "mid") {
+		if (teleportToPlace == "mid" || teleportToPlace == "Mid") {
 			room = 0;
 			var saved;
 			if (Math.random() > 0.5) {
@@ -300,7 +300,7 @@ pre {
 			}
 			events["savedHF"] = saved;
 			midChapterOne(saved);
-		} else if (teleportToPlace == "field") {
+		} else if (teleportToPlace == "field" || teleportToPlace == "Field) {
 			delete drawDoorMap["Hops"];
 			delete drawDoorMap["Fisher"];
 			room = 3;
