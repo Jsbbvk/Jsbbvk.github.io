@@ -94,6 +94,8 @@ var box = 1;
 var spike = 2;
 var air = 3;
 var finish = 4;
+
+var started = false;
 /*
 var jumpD = [];
 var jumpDX = [];
@@ -164,6 +166,10 @@ function keyUp(e) {
 }
 
 function keyDown(e) {
+	if (started == false) {
+		pause = false;
+		started = true;
+	}
 	keys[e.keyCode] = true;
 	
 	if (keys[80]) {
