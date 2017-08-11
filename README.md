@@ -1,4 +1,6 @@
 # Jacob Zhang's website
-
-Cupertino HS 2020
+ Work in Progress: 
+ *Jsbbvk.github.io/Platform.html
+# About the Coder: 
+ *Cupertino HS 2020
 
