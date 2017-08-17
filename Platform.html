@@ -120,7 +120,7 @@ function printLeaderboard(worldObj) {
     
 function addToLeaderboard(n, p, num) {
     var worldObj = worldObjArr[num-1];
-    if (worldObj.people > 9) {
+    if (worldObj.people > 4) {
         //delete last person
         worldObj.childArr.sort(function(a, b){return b-a});
         //greatest to least
