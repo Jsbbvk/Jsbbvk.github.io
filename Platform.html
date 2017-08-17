@@ -127,13 +127,13 @@ function addToLeaderboard(n, p, num) {
         var lastScore = worldObj.childArr[worldObj.childArr.length-1];
         var lastPerson = worldObj.childMap[lastScore][0];
         //var worldRef = leaderboard.ref().child("World" + worldNum);
-        worldObj.once("value")
+        worldObj.ref.once("value")
             .then(function(snapshot) {
                 snapshot.forEach(function (childSnapshot) {
                     var key = childSnapshot.key;
                     var val = childSnapshot.val();
                     if (key == lastPerson && lastScore == val) {
-                        worldObj.child(lastPerson).remove();
+                        worldObj.ref.child(lastPerson).remove();
                         
                     }
                 });
