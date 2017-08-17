@@ -435,7 +435,10 @@ function startGame() {
     state = gameS;
     println("IMPORTANT!!! Make sure everytime you lose or win,", "black");
     println("press space after the text", "black");
-	println("Use WASD to move", "black");
+    println("Player One, use WASD to move", "black");
+    if (playerGame == twoPlayer) {
+	println("Player Two, use ARROW keys to move", "black");    
+    }
     data(worldNum);
 	
 	
