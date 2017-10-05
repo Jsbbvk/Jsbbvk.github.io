@@ -486,6 +486,8 @@ var playerTWO = new Player(50, 350, 50, 50, 3, "http://www.clker.com/cliparts/W/
 var onePointText = new TextT("Player 1 Points: ", "10pt Arial", "red", 50, 50);
 var twoPointText = new TextT("Player 2 Points: ", "10pt Arial", "red", 300, 50);
 
+var ongoingTouches = [];
+	
 function init() {
     document.getElementById("myCanvas").addEventListener("mousemove", mouseMove);
 	document.getElementById("myCanvas").addEventListener("mousedown", mouseDown);
