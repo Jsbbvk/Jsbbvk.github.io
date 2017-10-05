@@ -506,7 +506,7 @@ function touchStart(e) {
     e.preventDefault();
       var el = document.getElementsByTagName("myCanvas")[0];
       var ctx = el.getContext("2d");
-      var touches = evt.changedTouches;
+      var touches = e.changedTouches;
 
       for (var i = 0; i < touches.length; i++) {
         println("touchstart:" + i + "...", "black");
