@@ -497,14 +497,16 @@ function init() {
     perSec();
     if (isMobile()) {
         window.addEventListener("touchstart", touchStart, false);
-        window.addEventListener("touchend", touchEnd, false)
+        window.addEventListener("touchend", touchEnd, false);
+	println("Launched", "black");
     }
     
 } 
     
 function touchStart(e) {
     e.preventDefault();
-      var el = document.getElementsByTagName("myCanvas")[0];
+	println("Touched", "black");
+      var el = document.getElementById("myCanvas");
       var ctx = el.getContext("2d");
       var touches = e.changedTouches;
 
