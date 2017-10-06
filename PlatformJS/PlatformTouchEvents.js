@@ -6,14 +6,14 @@ function touchStart(e) {
     var context = el.getContext("2d");
     var touches = e.changedTouches;
     
-    //console.log(e.clientX + " "  + e.clientY);
+   
     //var sX, sY = 0;
     
     for (var i = 0; i < touches.length; i++) {
         ongoingTouches.push(copyTouch(touches[i]));
         var x = touches[i].pageX;
         var y = touches[i].pageY;
-        
+        println("x + " " + y");
         var lButton = document.getElementById("lB");
         var lBR = lButton.getBoundingClientRect();
         var lx = lBR.left;
@@ -47,7 +47,9 @@ function touchStart(e) {
         for (var j = 0; i < drawMenu.length; j++) {
             var t = drawMenu[j];
             if (pointRectangle(x, y, t.x, t.y, t.width, t.height)) {
+                println("TOuch");
                 t.ontouchstart();
+                
             }
         }
     }
