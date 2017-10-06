@@ -1,4 +1,4 @@
-
+var ongoingTouches = [];
     
 function touchStart(e) {
     e.preventDefault();
@@ -8,40 +8,106 @@ function touchStart(e) {
     
     //console.log(e.clientX + " "  + e.clientY);
     //var sX, sY = 0;
-    /*
+    
     for (var i = 0; i < touches.length; i++) {
-        //intln("touchstart:" + i + "...", "black");
-//        ongoingTouches.push(copyTouch(touches[i]));
-//        var color = colorForTouch(touches[i]);
-//        ctx.beginPath();
-//        ctx.arc(touches[i].pageX, touches[i].pageY, 4, 0, 2 * Math.PI, false);  // a circle at the start
-//        ctx.fillStyle = color;
-//        ctx.fill();
-//        //println("touchstart:" + i + ".", "black");
-        sX += touches[i].pageX;
-        sY += touches[i].pageY;
-        console.log(touches[i].pageX + " " + touches[i].pageY + " " + touches.length);
-    }*/
-    //var avgX = sX / touches.length; 
-    //var avgY = sY / touches.length;
+        ongoingTouches.push(copyTouch(touches[i]));
+        var x = touches[i].pageX;
+        var y = touches[i].pageY;
+        
+        var lButton = document.getElementById("lB");
+        var lBR = lButton.getBoundingClientRect();
+        var lx = lBR.left;
+        var ly = lBR.top;
+        var lw = lButton.width;
+        var lh = lButton.height;
+        if (x >= lx && x <= lx+lw && y >= ly && y <= ly+lh) {
+            leftPressed();
+        }
+        
+        var uButton = document.getElementById("uB");
+        var uBR = uButton.getBoundingClientRect();
+        var ux = uBR.left;
+        var uy = uBR.top;
+        var uw = uButton.width;
+        var uh = uButton.height;
+        if (x >= ux && x <= ux+uw && y >= uy && y <= uy+uh) {
+            upPressed();
+        }
+        
+        var rButton = document.getElementById("rB");
+        var rBR = rButton.getBoundingClientRect();
+        var rx = rBR.left;
+        var ry = rBR.top;
+        var rw = rButton.width;
+        var rh = rButton.height;
+        if (x >= rx && x <= rx+rw && y >= ry && y <= ry+rh) {
+            rightPressed();
+        }
+    }
     
-    //console.log(touches[0].pageX + " " + touches[0].pageY);
-    var x = touches[0].pageX;
-    var y = touches[0].pageY;
-    
-    //if (x > window.innerWidth/2) console.log("WG");
-    //else console.log("WL");
-    
-    //if (y > window.innerHeight/2) console.log("YG");
-    //else console.log("YL");
 }
     
 function touchEnd(e) {
-    
+    //e.preventDefault();
+    var touches = e.changedTouches;
+
+    for (var i = 0; i < touches.length; i++) {
+        var x = touches[i].pageX;
+        var y = touches[i].pageY;
+        
+        var idx = ongoingTouchIndexById(touches[i].identifier);
+        
+        var lButton = document.getElementById("lB");
+        var lBR = lButton.getBoundingClientRect();
+        var lx = lBR.left;
+        var ly = lBR.top;
+        var lw = lButton.width;
+        var lh = lButton.height;
+        if (x >= lx && x <= lx+lw && y >= ly && y <= ly+lh) {
+            leftReleased();
+            console.log("LR");
+        }
+        
+        var uButton = document.getElementById("uB");
+        var uBR = uButton.getBoundingClientRect();
+        var ux = uBR.left;
+        var uy = uBR.top;
+        var uw = uButton.width;
+        var uh = uButton.height;
+        if (x >= ux && x <= ux+uw && y >= uy && y <= uy+uh) {
+            upReleased();
+            console.log("UR");
+        }
+        
+        var rButton = document.getElementById("rB");
+        var rBR = rButton.getBoundingClientRect();
+        var rx = rBR.left;
+        var ry = rBR.top;
+        var rw = rButton.width;
+        var rh = rButton.height;
+        if (x >= rx && x <= rx+rw && y >= ry && y <= ry+rh) {
+            rightReleased();
+            console.log("RR");
+        }
+        
+        ongoingTouches.splice(idx, 1);
+        console.log(ongoingTouches.length);
+    }
 }
     
 function copyTouch(touch) {
     return { identifier: touch.identifier, pageX: touch.pageX, pageY: touch.pageY };
+}
+
+function ongoingTouchIndexById(idToFind) {
+  for (var i = 0; i < ongoingTouches.length; i++) {
+    var id = ongoingTouches[i].identifier;
+    
+    if (id == idToFind) {
+      return i;
+    }
+  }
+  return -1;    // not found
 }
 
 function colorForTouch(touch) {

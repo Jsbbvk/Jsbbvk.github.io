@@ -119,7 +119,7 @@ var worldTest = [
 ];
     
 //put world into the world map
-var mapWorlds = [world1, world2, world3, world4, world5];
+var mapWorlds = [worldTest, world2, world3, world4, world5];
 var worldImgB = [];
 
  
