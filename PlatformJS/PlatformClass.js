@@ -97,7 +97,10 @@ class Img {
             callback && callback();
         }
         this.ontouchend = function() {
-            if (mobile) callback && callback();   
+            if (mobile) {
+                println("Clicked", "black");
+                callback && callback();   
+            }
         }
     }
 }
