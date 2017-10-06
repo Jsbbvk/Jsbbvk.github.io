@@ -13,7 +13,7 @@ function touchStart(e) {
         ongoingTouches.push(copyTouch(touches[i]));
         var x = touches[i].pageX;
         var y = touches[i].pageY;
-        println("x + " " + y");
+       // println("x + " " + y");
         var lButton = document.getElementById("lB");
         var lBR = lButton.getBoundingClientRect();
         var lx = lBR.left;
