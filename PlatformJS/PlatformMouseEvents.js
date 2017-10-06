@@ -7,7 +7,8 @@ function mouseDown(e) {
     for (var i = 0; i < drawMenu.length; i++) {
         var t = drawMenu[i];
         if (pointRectangle(e.x, e.y, t.x, t.y, t.width, t.height)) {
-            t.onclick();
+            if (mobile) t.touchstart();
+            else t.onclick();
         }
     }
 }
