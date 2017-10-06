@@ -96,7 +96,7 @@ class Img {
         this.onclick = function() {
             callback && callback();
         }
-        this.ontouchend = function() {
+        this.ontouchstart = function() {
             if (mobile) {
                 println("Clicked", "black");
                 callback && callback();   
