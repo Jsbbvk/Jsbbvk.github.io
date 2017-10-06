@@ -97,10 +97,10 @@ class Img {
             callback && callback();
         }
         this.touchstart = function() {
-            if (mobile) {
+            
                 println("Clicked", "black");
                 callback && callback();   
-            }
+            
         }
     }
 }
