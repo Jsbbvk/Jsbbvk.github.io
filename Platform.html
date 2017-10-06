@@ -147,19 +147,21 @@ function menu() {
     window.addEventListener("keydown", null);
 	window.addEventListener("keyup", null);
     state = menuS;
-    
+    println("50, 200", "black");
+
     var singleB = new Img("https://dabuttonfactory.com/button.png?t=1+Player&f=Calibri-Bold&ts=24&tc=fff&tshs=1&tshc=000&hp=20&vp=8&c=5&bgt=gradient&bgc=00f&ebgc=073763", 50, 200, 150, 50, function() {
         playerGame = onePlayer;
         //remove the two buttons
         drawMenu.splice(0, 2);
         setTimeout(function() {displayWorldLvl();}, 500);
     });
-    
+    if (!mobile) {
     var doubleB = new Img("https://dabuttonfactory.com/button.png?t=2+Player&f=Calibri-Bold&ts=24&tc=fff&tshs=1&tshc=000&hp=20&vp=8&c=5&bgt=gradient&bgc=00f&ebgc=073763", 300, 200, 150, 50, function() {
         playerGame = twoPlayer;
         drawMenu.splice(0, 2);
         setTimeout(function() {displayWorldLvl();}, 500);
     });
+    }
     
     menuImg.push(singleB);
     drawMenu.push(singleB);
