@@ -47,7 +47,7 @@ function touchStart(e) {
         for (var j = 0; i < drawMenu.length; j++) {
             var t = drawMenu[j];
             if (pointRectangle(x, y, t.x, t.y, t.width, t.height)) {
-                println("TOuch");
+                //println("TOuch");
                 t.ontouchstart();
                 
             }
