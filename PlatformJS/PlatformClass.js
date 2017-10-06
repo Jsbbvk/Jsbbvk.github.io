@@ -96,6 +96,9 @@ class Img {
         this.onclick = function() {
             callback && callback();
         }
+        this.ontouchend = function() {
+            if (mobile) callback && callback();   
+        }
     }
 }
 
