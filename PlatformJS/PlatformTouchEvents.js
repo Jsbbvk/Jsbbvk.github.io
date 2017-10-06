@@ -43,6 +43,13 @@ function touchStart(e) {
         if (x >= rx && x <= rx+rw && y >= ry && y <= ry+rh) {
             rightPressed();
         }
+        
+        for (var j = 0; i < drawMenu.length; j++) {
+            var t = drawMenu[j];
+            if (pointRectangle(x, y, t.x, t.y, t.width, t.height)) {
+                t.ontouchstart();
+            }
+        }
     }
     
 }
