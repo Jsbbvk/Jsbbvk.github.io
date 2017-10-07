@@ -27,6 +27,10 @@
         font-size: 125%;
     }
     
+    div {
+        /*border: 1px solid black;*/
+    }
+    
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
@@ -122,7 +126,7 @@ var leftTimer, rightTimer, upTimer;
 function init() {
     document.getElementById("myCanvas").addEventListener("mousemove", mouseMove);
 	document.getElementById("myCanvas").addEventListener("mousedown", mouseDown);
-    menu();
+    
     
     onTick();
     perSec();
@@ -134,12 +138,14 @@ function init() {
         document.getElementById("rB").style.visibility = "visible";
         document.getElementById("lB").style.visibility = "visible";
         document.getElementById("uB").style.visibility = "visible";
+        
     } else {
         document.getElementById("rB").style.visibility = "hidden";
         document.getElementById("lB").style.visibility = "hidden";
         document.getElementById("uB").style.visibility = "hidden";
     }
-    
+    document.getElementById("resetB").style.visibility = "hidden";
+    menu();
 } 
     
     
@@ -147,26 +153,32 @@ function menu() {
     window.addEventListener("keydown", null);
 	window.addEventListener("keyup", null);
     state = menuS;
-    println("50, 200", "black");
-
-    var singleB = new Img("https://dabuttonfactory.com/button.png?t=1+Player&f=Calibri-Bold&ts=24&tc=fff&tshs=1&tshc=000&hp=20&vp=8&c=5&bgt=gradient&bgc=00f&ebgc=073763", 50, 200, 150, 50, function() {
+    
+    var sX = (mobile) ? document.getElementById("myCanvas").width/2 - 75 : 50;
+    
+    var singleB = new Img("https://dabuttonfactory.com/button.png?t=1+Player&f=Calibri-Bold&ts=24&tc=fff&tshs=1&tshc=000&hp=20&vp=8&c=5&bgt=gradient&bgc=00f&ebgc=073763", sX, 200, 150, 50, function() {
         playerGame = onePlayer;
         //remove the two buttons
         drawMenu.splice(0, 2);
         setTimeout(function() {displayWorldLvl();}, 500);
     });
-    if (!mobile) {
+    
+    
     var doubleB = new Img("https://dabuttonfactory.com/button.png?t=2+Player&f=Calibri-Bold&ts=24&tc=fff&tshs=1&tshc=000&hp=20&vp=8&c=5&bgt=gradient&bgc=00f&ebgc=073763", 300, 200, 150, 50, function() {
         playerGame = twoPlayer;
         drawMenu.splice(0, 2);
         setTimeout(function() {displayWorldLvl();}, 500);
     });
-    }
-    
-    menuImg.push(singleB);
-    drawMenu.push(singleB);
+       
+        
+    if (!mobile) {
     menuImg.push(doubleB);
     drawMenu.push(doubleB);
+    }
+
+    menuImg.push(singleB);
+    drawMenu.push(singleB);
+    
     
 }
     
@@ -178,6 +190,12 @@ function onTick() {
     //printWorldLevel(false);
     if (started) {
         tDrawArr.splice(0, 2);
+    }
+    if (pause && state != menuS && mobile && !started) {
+        //document.getElementById("rB").style.visibility = "hidden";
+        //document.getElementById("lB").style.visibility = "hidden";
+        //document.getElementById("uB").style.visibility = "hidden";
+        document.getElementById("resetB").style.visibility = "visible";
     }
 }
 	
@@ -655,7 +673,18 @@ function drawScreen() {
 
 }
 	
-
+function resetPressed() {
+    if (mobile) {
+        if (pause && started) {
+            if (playerONE.win || playerTWO.win || (playerTWO.win == false && playerONE.win == false)) {
+                
+                console.log("Reset!!");
+                resetGame();
+            }
+        }
+    }
+}
+    
 function leftPressed() {
     if (mobile) {
         keys[65] = true;
@@ -667,8 +696,6 @@ function leftPressed() {
             keys[65] = false;
         }
     }
-    
-    
 }
     
 function leftReleased() {
@@ -764,10 +791,11 @@ Your browser does not support the HTML5 canvas tag.
             <td width="30%"><div><img src="Images/left.png" id="lB" width="300px" height="300px"  align="center"></div> </td>
             <td width="40%"><div><img src="Images/up.png" id="uB" width="300px" height="300px" style="margin: auto; display: block"></div></td>
             <td width="30%"><div><img src="Images/right.png" id="rB" width="300px" height="300px"  align="center"></div></td>
-           
+            
         </tr>
     </table>
-
+    <br><br>
+    <div style="margin: auto; position: absolute; left: 25%"><img src="Images/reset.png" id="resetB"></div>
 </body>
 </html>
 

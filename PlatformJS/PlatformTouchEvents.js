@@ -1,19 +1,19 @@
 var ongoingTouches = [];
     
 function touchStart(e) {
-    e.preventDefault();
-    var el = document.getElementById("myCanvas");
-    var context = el.getContext("2d");
+    //e.preventDefault();
+    //var el = document.getElementById("myCanvas");
+    //var context = el.getContext("2d");
     var touches = e.changedTouches;
     
-   
+    //console.log(e.clientX + " "  + e.clientY);
     //var sX, sY = 0;
     
     for (var i = 0; i < touches.length; i++) {
         ongoingTouches.push(copyTouch(touches[i]));
         var x = touches[i].pageX;
         var y = touches[i].pageY;
-       // println("x + " " + y");
+        
         var lButton = document.getElementById("lB");
         var lBR = lButton.getBoundingClientRect();
         var lx = lBR.left;
@@ -44,12 +44,21 @@ function touchStart(e) {
             rightPressed();
         }
         
-        for (var j = 0; i < drawMenu.length; j++) {
+        var resetButton = document.getElementById("resetB");
+        var resetBR = resetButton.getBoundingClientRect();
+        var resetx = resetBR.left;
+        var resety = resetBR.top;
+        var resetw = resetButton.width;
+        var reseth = resetButton.height;
+        if (x >= resetx && x <= resetx+resetw && y >= resety && y <= resety+reseth) {
+            console.log("reset?");
+            resetPressed();
+        }
+        
+        for (var j = 0; j < drawMenu.length; j++) {
             var t = drawMenu[j];
             if (pointRectangle(x, y, t.x, t.y, t.width, t.height)) {
-                //println("TOuch");
                 t.ontouchstart();
-                
             }
         }
     }
@@ -74,7 +83,7 @@ function touchEnd(e) {
         var lh = lButton.height;
         if (x >= lx && x <= lx+lw && y >= ly && y <= ly+lh) {
             leftReleased();
-            console.log("LR");
+            //console.log("LR");
         }
         
         var uButton = document.getElementById("uB");
@@ -85,7 +94,7 @@ function touchEnd(e) {
         var uh = uButton.height;
         if (x >= ux && x <= ux+uw && y >= uy && y <= uy+uh) {
             upReleased();
-            console.log("UR");
+            //console.log("UR");
         }
         
         var rButton = document.getElementById("rB");
@@ -96,11 +105,11 @@ function touchEnd(e) {
         var rh = rButton.height;
         if (x >= rx && x <= rx+rw && y >= ry && y <= ry+rh) {
             rightReleased();
-            console.log("RR");
+            //console.log("RR");
         }
         
         ongoingTouches.splice(idx, 1);
-        console.log(ongoingTouches.length);
+        //console.log(ongoingTouches.length);
     }
 }
     

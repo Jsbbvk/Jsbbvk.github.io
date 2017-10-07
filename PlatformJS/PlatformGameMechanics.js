@@ -120,6 +120,7 @@ function gameOver() {
 }
     
 function resetGame() {
+    console.log("reseting");
     println("");
     println("");
     
