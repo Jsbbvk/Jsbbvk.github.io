@@ -1,0 +1,212 @@
+<!DOCTYPE html> <html>
+<head>
+    <style>
+        #myCanvas {
+            border: 1px solid black;
+            cursor: none;
+        }
+        .pointerEventsNone {
+            display: none;
+        }
+        
+    </style>
+    
+    <script>
+        //based on "God Save the Queen"
+        class Img {
+            constructor(src, x, y, width, height, callback) {
+                this.img = new Image();
+                this.src = src;
+                this.img.src = this.src;
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+
+                this.onclick = function() {
+                    callback && callback();
+                }
+                this.ontouchstart = function() {
+                    if (mobile) callback && callback();
+                }
+            }
+        }
+        
+        class Player {
+            constructor(src, x, y, width, height, speed) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.speed = speed;
+                this.img = new Image();
+                this.img.src = src;
+            }
+        }
+        
+        
+        
+        
+        class Sprite {
+            constructor(sx, sy, x, y, width, height, img, context, totalFrame, ticksPerFrame, speed) {
+                this.width = width;
+                this.height = height;
+                this.img = img;
+                this.context = context;
+                this.x = x;
+                this.y = y;
+                this.sx = sx;
+                this.sy = sy;
+                this.speed = speed;
+                
+                this.frameIdx = 0;
+                this.totalFrame = totalFrame;
+                
+                this.ticksCount = 0;
+                this.ticksPerFrame = ticksPerFrame;
+                
+                this.render = function() {
+                    this.context.drawImage(this.img, this.frameIdx * this.width, this.sy, this.width, this.height, this.x, this.y, this.width, this.height); 
+                }
+                
+                this.update = function() {
+                    this.ticksCount++;
+                    if (this.ticksCount > this.ticksPerFrame) {
+                        this.ticksCount = 0;
+                        this.frameIdx++;
+                        if (this.frameIdx == this.totalFrame) this.frameIdx = 0;
+                    }
+                }
+            }           
+        }
+        var mouse = {
+            x:0,
+            y:0
+        };
+        
+       var keys = [];
+        
+        var crosshair = new Img("Images/crosshairImg.png", mouse.x, mouse.y, 200, 200, null);
+        
+        
+        
+        var canvas;
+        var context;
+        var height;
+        var width;
+        
+        var walkingSprite;
+        
+        function init() {
+            canvas = document.getElementById("myCanvas");
+            context = canvas.getContext("2d");
+            height = canvas.height;
+            width = canvas.width;
+            
+            var sprImg = new Image();
+            sprImg.src = "Images/runningGuy.png";
+            //console.log(sprImg.width);
+            sprImg.onload = function() {
+                walkingS = new Sprite(sprImg.width/8, 0, width/2, height/2, sprImg.width/8, sprImg.height/2, sprImg, context, 8, 10, 2);
+                drawScreen();
+            };
+            
+            document.getElementById("myCanvas").addEventListener("mousedown", mouseDown, false);
+            document.getElementById("myCanvas").addEventListener("mousemove", mouseMove, false);
+            
+           
+            window.addEventListener("keydown", keyDown);
+            window.addEventListener("keyup", keyUp);
+            
+        }
+        
+        function keyDown(e) {
+            keys[e.keyCode] = true;
+        }
+        
+        function keyUp(e) {
+            keys[e.keyCode] = false;
+        }
+        
+        function mouseDown(e) {
+            e.preventDefault();
+            var r = document.getElementById("myCanvas").getBoundingClientRect();
+            var x = e.clientX - r.left; 
+            var y = e.clientY - r.top;
+            
+            if (x > walkingS.x && x < walkingS.x + walkingS.width && y > walkingS.y && y < walkingS.y + walkingS.height) {
+                console.log("hit");
+            }
+            
+        }
+        
+        function mouseMove(e) {
+            var r = document.getElementById("myCanvas").getBoundingClientRect();
+            mouse.x = e.clientX - r.left;
+            mouse.y = e.clientY - r.top;
+            //console.log("A");
+        }
+        
+        
+        
+        function drawScreen() {
+            
+            
+            context.clearRect(0, 0, width, height);
+            
+            
+            walkingS.render();
+            walkingS.update();
+            
+            if (keys[87]) {
+                //W
+                walkingS.y -= walkingS.speed;
+            }
+            if (keys[68]) {
+                //D
+                walkingS.sy = 0;
+                walkingS.x += walkingS.speed;
+            }
+            if (keys[65]) {
+                //A
+                walkingS.sy = walkingS.height;
+                walkingS.x -= walkingS.speed;
+            }
+            if (keys[83]) {
+                //S
+                walkingS.y += walkingS.speed;
+            }
+            
+            if (walkingS.x < 0) {
+                walkingS.x += walkingS.speed;
+            } else if (walkingS.x + walkingS.width > width) {
+                walkingS.x -= walkingS.speed;
+            }
+            if (walkingS.y < 0) {
+                walkingS.y += walkingS.speed;
+            } else if  (walkingS.y+walkingS.height > height) {
+                walkingS.y -= walkingS.speed;
+            }
+            
+            
+            context.drawImage(crosshair.img, mouse.x - crosshair.width/2, mouse.y - crosshair.height/2, crosshair.width, crosshair.height);
+            
+            
+            requestAnimationFrame(drawScreen);
+        }
+        
+        
+        
+        
+        
+        
+    </script>
+</head>
+    
+<body onload="init()">
+    <div>
+        <canvas id="myCanvas" width="1000px" height="500px" style="margin: auto; display: block">
+        </canvas>
+    </div>
+</body>
+</html>
