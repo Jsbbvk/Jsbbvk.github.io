@@ -1,7 +1,7 @@
 var ongoingTouches = [];
     
 function touchStart(e) {
-    //e.preventDefault();
+    e.preventDefault();
     //var el = document.getElementById("myCanvas");
     //var context = el.getContext("2d");
     var touches = e.changedTouches;
