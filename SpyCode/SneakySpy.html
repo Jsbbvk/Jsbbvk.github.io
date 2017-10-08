@@ -13,6 +13,7 @@
     
     <script>
         //based on "God Save the Queen"
+        //link: http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/
         class Img {
             constructor(src, x, y, width, height, callback) {
                 this.img = new Image();
@@ -58,7 +59,8 @@
                 this.sx = sx;
                 this.sy = sy;
                 this.speed = speed;
-                
+                this.velX = 0;
+                this.velY = 0;
                 this.frameIdx = 0;
                 this.totalFrame = totalFrame;
                 
@@ -79,6 +81,19 @@
                 }
             }           
         }
+        
+        class SpriteState {
+            constructor() {
+               
+                this.move = 0;
+                this.stationary = 1;
+                
+                this.state = this.stationary;
+                this.targetX = 0;
+                this.targetY = 0;
+                this.timer = 0;
+            }
+        }
         var mouse = {
             x:0,
             y:0
@@ -97,19 +112,43 @@
         
         var walkingSprite;
         
+        var cpuSprites = [];
+        var cpuStates = [];
+        
+        var corners = [];
+        
+        var friction = 0.9;
+        
         function init() {
             canvas = document.getElementById("myCanvas");
             context = canvas.getContext("2d");
             height = canvas.height;
             width = canvas.width;
             
+            
+            
+            
             var sprImg = new Image();
             sprImg.src = "Images/runningGuy.png";
             //console.log(sprImg.width);
             sprImg.onload = function() {
                 walkingS = new Sprite(sprImg.width/8, 0, width/2, height/2, sprImg.width/8, sprImg.height/2, sprImg, context, 8, 10, 2);
+                for (var i = 0; i < 10; i++) {
+                    cpuSprites.push(new Sprite(sprImg.width/8, 0, i * 50, i * 25, sprImg.width/8, sprImg.height/2, sprImg, context, 8, 10, 2));
+                    cpuStates.push(new SpriteState());
+                }
+                
+                var w = walkingS.width;
+                var h = walkingS.height;
+                corners.push([w, h]);
+                corners.push([width-w, h]);
+                corners.push([w, height-h]);
+                corners.push([width-w, height-h]);
+                
                 drawScreen();
             };
+            
+            
             
             document.getElementById("myCanvas").addEventListener("mousedown", mouseDown, false);
             document.getElementById("myCanvas").addEventListener("mousemove", mouseMove, false);
@@ -147,7 +186,80 @@
             //console.log("A");
         }
         
+        function random(min, max) {
+            return Math.floor(Math.random() * (max-min+1) + min);
+        }
         
+        function renderCPU() {
+            
+            for (var i = 0; i < cpuSprites.length; i++) {
+                var cpu = cpuSprites[i];
+                cpu.render();
+                cpu.update();
+                
+                var cpuS = cpuStates[i];
+                
+                if (cpuS.timer < 1) {
+                    
+                    cpuS.timer = random(500, 1000);
+                    cpuS.state = (random(1, 2) == 1) ? cpuS.move : cpuS.stationary;
+                    if (cpuS.state == cpuS.move) {
+                        console.log(i + " DONE");
+                        cpuS.targetX = corners[random(0, 3)][0] + random(-cpu.width/2, cpu.width);
+                        cpuS.targetY = corners[random(0, 3)][1] + random(-cpu.height/2, cpu.height/2);  
+                    }
+                }
+                cpuS.timer--;
+                if (cpuS.state == cpuS.stationary) {
+                    cpuS.timer -= 5;
+                }
+                if (cpuS.state == cpuS.move) {
+                    if (!(x + cpu.width > tX && x - cpu.width < tX && y-cpu.height < tY && y+cpu.height > tY)) {
+                        
+                    
+                        var tX = cpuS.targetX;
+                        var tY = cpuS.targetY;
+                        var x = cpu.x;
+                        var y = cpu.y;
+                        var dx;
+                        var dy;
+                        dx = tX - x;
+                        dy = tY - x;
+                        var mag = (Math.sqrt(dx * dx + dy * dy));
+
+
+                        var rotation = Math.atan2(dy, dx);
+
+                        cpu.velX =  Math.cos(rotation) * cpu.speed;
+                        cpu.velY = Math.sin(rotation) * cpu.speed;
+                        
+                        cpu.x += cpu.velX; cpu.y += cpu.velY;
+                        if (cpu.velX > 0) {
+                            cpu.sy = 0;
+                        } else if (cpu.velX < 0) {
+                            cpu.sy = cpu.height;
+                        } else {
+                            cpu.sy = (random(1, 2) == 1) ? 0 : cpu.height;
+                        }
+                        if (cpu.x < 0) {
+                            cpu.x += Math.abs(cpu.velX);
+                        } else if (cpu.x + cpu.width > width) {
+                            cpu.x -= Math.abs(cpu.velX);
+                        }
+                        if (cpu.y < 0) {
+                            cpu.y += Math.abs(cpu.velY);
+                        } else if  (cpu.y+cpu.height > height) {
+                            cpu.y -= Math.abs(cpu.velY);
+                        }
+                    } else {
+                        cpuS.state = cpuS.stationary;
+                        
+                    }
+                }
+            }
+            
+            
+        }
         
         function drawScreen() {
             
@@ -160,34 +272,47 @@
             
             if (keys[87]) {
                 //W
-                walkingS.y -= walkingS.speed;
+                if (walkingS.velY > -walkingS.speed) {
+                    walkingS.velY--;
+                }
             }
             if (keys[68]) {
                 //D
+                if (walkingS.velX < walkingS.speed) {             
+                    walkingS.velX++;         
+                }  
                 walkingS.sy = 0;
-                walkingS.x += walkingS.speed;
             }
             if (keys[65]) {
                 //A
+                if (walkingS.velX > -walkingS.speed) {             
+                    walkingS.velX--;         
+                }  
                 walkingS.sy = walkingS.height;
-                walkingS.x -= walkingS.speed;
             }
             if (keys[83]) {
                 //S
-                walkingS.y += walkingS.speed;
+                if (walkingS.velY < walkingS.speed) {             
+                    walkingS.velY++;         
+                }  
             }
+            walkingS.velX *= friction;
+            walkingS.velY *= friction;
+            
+            walkingS.x += walkingS.velX; walkingS.y += walkingS.velY;
             
             if (walkingS.x < 0) {
-                walkingS.x += walkingS.speed;
+                walkingS.x += Math.abs(walkingS.velX);
             } else if (walkingS.x + walkingS.width > width) {
-                walkingS.x -= walkingS.speed;
+                walkingS.x -= Math.abs(walkingS.velX);
             }
             if (walkingS.y < 0) {
-                walkingS.y += walkingS.speed;
+                walkingS.y += Math.abs(walkingS.velY);
             } else if  (walkingS.y+walkingS.height > height) {
-                walkingS.y -= walkingS.speed;
+                walkingS.y -= Math.abs(walkingS.velY);
             }
             
+            renderCPU();
             
             context.drawImage(crosshair.img, mouse.x - crosshair.width/2, mouse.y - crosshair.height/2, crosshair.width, crosshair.height);
             
