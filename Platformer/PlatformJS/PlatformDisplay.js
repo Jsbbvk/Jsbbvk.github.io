@@ -30,12 +30,19 @@ function displayWorldLvl() {
         drawMenu.splice(0, drawMenu.length);
         startGame();
     });
+    //world 6 button
+    var world6B = new Img("https://dabuttonfactory.com/button.png?t=World+6&f=Calibri-Bold&ts=24&tc=fff&tshs=1&tshc=000&hp=20&vp=8&c=5&bgt=gradient&bgc=f0f&ebgc=0b5394", 300, 300, 150, 50, function() {
+        worldNum = 6;
+        drawMenu.splice(0, drawMenu.length);
+        startGame();
+    })
     
     worldImgB.push(world1B); drawMenu.push(world1B);
     worldImgB.push(world2B); drawMenu.push(world2B);
     worldImgB.push(world3B); drawMenu.push(world3B);
     worldImgB.push(world4B); drawMenu.push(world4B);
     worldImgB.push(world5B); drawMenu.push(world5B);
+    worldImgB.push(world6B); drawMenu.push(world6B);
 }  
 
 function println(words, color) {

@@ -20,6 +20,7 @@ function keyDown(e) {
 	}
     
     if (keys[32]) {
+        e.preventDefault();
         //SPACE 
         if (pause) {
             if (playerONE.win || playerTWO.win || (playerTWO.win == false && playerONE.win == false)) {
