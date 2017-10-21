@@ -82,56 +82,68 @@ function printLeaderboard(worldObj) {
         }
     }
 }
-    
+    //(name, points, worldNumber)
 function addToLeaderboard(n, p, num) {
+    
     var worldObj = worldObjArr[num-1];
+    //console.log("INTO here " + worldObj.people);
     if (worldObj.people > 4) {
         //delete last person
         worldObj.childArr.sort(function(a, b){return b-a});
         //greatest to least
         var lastScore = worldObj.childArr[worldObj.childArr.length-1];
         var lastPerson = worldObj.childMap[lastScore][0];
-        //var worldRef = leaderboard.ref().child("World" + worldNum);
-        worldObj.ref.once("value")
-            .then(function(snapshot) {
-                snapshot.forEach(function (childSnapshot) {
-                    var key = childSnapshot.key;
-                    var val = childSnapshot.val();
-                    if (key == lastPerson && lastScore == val) {
-                        worldObj.ref.child(lastPerson).remove();
-                        
-                    }
-                });
-            });
-        //remove from array
-        if (worldObj.childMap[lastScore].length == 1) {
-            //only one instance of the score
-            worldObj.childArr.splice(worldObj.childArr.length-1, 1);
+        
+        //console.log(p + " " + lastScore);
+        //console.log("ASDFASDF");
+        if (p < lastScore) {
+            println("Ooooohh...", "red");
+            println("You don't have enough points to be on the leaderboard...", "red");
+            console.log("not enough");
         } else {
-            //remove first (oldest) score
-            worldObj.childMap[lastScore].splice(0, 1);
+            //var worldRef = leaderboard.ref().child("World" + worldNum);
+            worldObj.ref.once("value")
+                .then(function(snapshot) {
+                    snapshot.forEach(function (childSnapshot) {
+                        var key = childSnapshot.key;
+                        var val = childSnapshot.val();
+                        if (key == lastPerson && lastScore == val) {
+                            worldObj.ref.child(lastPerson).remove();
+
+                        }
+                    });
+                });
+            //remove from array
+            if (worldObj.childMap[lastScore].length == 1) {
+                //only one instance of the score
+                worldObj.childArr.splice(worldObj.childArr.length-1, 1);
+            } else {
+                //remove first (oldest) score
+                worldObj.childMap[lastScore].splice(0, 1);
+            }
         }
+    } 
+    if (worldObj.people < 5) {
+        var updates = {};
+        updates['/Leaderboard/World' + worldNum + '/' + n] = p;
+        database.ref().update(updates);
+
+        if (worldObj.childArr.indexOf(p) != -1) {
+            //already exists
+            worldObj.childMap[p].push(n);
+        } else {
+            worldObj.childArr.push(p);
+            //console.log(childArr.length);
+            worldObj.childMap[p] = new Array();
+            worldObj.childMap[p].push(n);
+        }
+
+        printlnLeaderboard("");
+        printlnLeaderboard("");
+        printlnLeaderboard("NEW Leaderboard of World " + num + ": ", "red");
+
+        worldObj.people++;
+        printLeaderboard(worldObj);
     }
-    
-    var updates = {};
-    updates['/Leaderboard/World' + worldNum + '/' + n] = p;
-    database.ref().update(updates);
-
-    if (worldObj.childArr.indexOf(p) != -1) {
-        //already exists
-        worldObj.childMap[p].push(n);
-    } else {
-        worldObj.childArr.push(p);
-        //console.log(childArr.length);
-        worldObj.childMap[p] = new Array();
-        worldObj.childMap[p].push(n);
-    }
-
-    printlnLeaderboard("");
-    printlnLeaderboard("");
-    printlnLeaderboard("NEW Leaderboard of World " + num + ": ", "red");
-
-    worldObj.people++;
-    printLeaderboard(worldObj);
 }
     

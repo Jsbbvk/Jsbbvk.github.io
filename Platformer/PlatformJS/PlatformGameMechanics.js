@@ -120,7 +120,7 @@ function gameOver() {
 }
     
 function resetGame() {
-    console.log("reseting");
+    //console.log("reseting");
     println("");
     println("");
     
@@ -198,7 +198,8 @@ function resetGame() {
                 alert("... okay anonymous...not putting you on the leaderboard...");
             } else {
                 //add into firebase
-                 name = name.trim();
+                name = name.trim();
+                //console.log("RESET");
                 addToLeaderboard(name, tPoints, worldNum);
             }
             println("Press SPACE to retry", "red");
