@@ -1,0 +1,95 @@
+<!DOCTYPE html> <html>
+<head>
+   <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-messaging.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+    <script>
+        
+       
+          var config = {
+            apiKey: "AIzaSyCZjt0SMXe12qPYjxIPRXMqw4LGXCcy37w",
+            authDomain: "platform-c316b.firebaseio.com/.firebaseapp.com",
+            databaseURL: "https://platform-c316b.firebaseio.com/",
+            storageBucket: "platform-c316b.appspot.com"
+            };
+          firebase.initializeApp(config);
+       // header('Access-Control-Allow-Origin: *');
+    //    header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    //    header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
+        function newUser() {
+            
+        }
+        
+        
+        function signIn() {
+            /// var email = document.getElementById("Email").value;
+            //var pass = document.getElementById("Pass").value;
+            var provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then(function(result) {
+              // This gives you a Google Access Token. You can use it to access the Google API.
+              var token = result.credential.accessToken;
+              // The signed-in user info.
+              var user = result.user;
+            console.log("SUCCESS!");
+              // ...
+            }).catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              // The email of the user's account used.
+              var email = error.email;
+              // The firebase.auth.AuthCredential type that was used.
+              var credential = error.credential;
+                console.log(errorCode);
+                console.log(errorMessage);
+                console.log(email + " " + credential);
+              // ...
+            });
+        }
+       
+        
+        function init() {
+            /*var email = document.getElementById("Email").value;
+            var pass = document.getElementById("Pass").value;
+            if (isValidEmail(email)) {
+                firebase.auth().signInWithEmailAndPassword(email, pass).catch(function(error) {
+                  // Handle Errors here.
+                  var errorCode = error.code;
+                  var errorMessage = error.message;
+                  // ...
+                });
+            }*/
+            
+        }
+        
+        function isValidEmail(email) {
+            //check if it's a valid email
+            return true;
+        }
+        
+    </script>
+
+    
+    
+    
+</head>
+<body onload="init()">
+    
+    <form action="/action_page.php">
+      Email:<br>
+      <input id="Email" type="text" name="firstname" value="">
+      <br>
+        Password:<br>
+      <input id="Pass" type="password" name="lastname" value="">
+      <br><br>
+      <input type="button" value="Submit" onclick="signIn()">
+    </form> 
+
+    
+    </body>
+
+</html>
+
