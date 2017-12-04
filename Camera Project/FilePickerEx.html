@@ -1,0 +1,102 @@
+<!DOCTYPE html><html>
+<head>
+    <style>
+    #canvas {
+        width:500px;
+        height:500px;
+        border: 10px solid black;
+    }
+    .rectangle {
+        border: 1px solid #FF0000;
+        position: absolute;
+    }
+    </style>
+    <script src="ocrad.js"></script>
+    
+    </head>
+<body >
+    <div id="canvas" ></div>
+    <!--<canvas id="myCanvas" onload="onload()" width="500px" height="500px"></canvas>
+    <!--<button onclick="init()" width="100px" height="100px"></button>
+    <input type="file" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|images/*">
+    <img src="numbersTestText.png" id="myimg">-->
+    </body>
+    
+    <script>
+        function onload() {
+           // var canvas = document.getElementById('myCanvas');
+        //var context = canvas.getContext('2d');
+            
+        }
+        function init() {
+            
+           
+            /*
+            var img = document.getElementById("myimg");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0);
+            var myData = context.getImageData(0, 0, img.width, img.height);
+            var str = OCRAD(myData);
+            var strArray = str.split(" ");
+            console.log(str + " " + strArray.length);
+            for (var s in strArray) {
+                console.log(s + " ");
+            }*/
+        }
+        
+        
+        
+         initDraw(document.getElementById('canvas'));
+
+
+        function initDraw(canvas) {
+            function setMousePosition(e) {
+                var ev = e || window.event; //Moz || IE
+                if (ev.pageX) { //Moz
+                    mouse.x = ev.pageX + window.pageXOffset;
+                    mouse.y = ev.pageY + window.pageYOffset;
+                } else if (ev.clientX) { //IE
+                    mouse.x = ev.clientX + document.body.scrollLeft;
+                    mouse.y = ev.clientY + document.body.scrollTop;
+                }
+            };
+
+            var mouse = {
+                x: 0,
+                y: 0,
+                startX: 0,
+                startY: 0
+            };
+            var element = null;
+
+            canvas.onmousemove = function (e) {
+                setMousePosition(e);
+                if (element !== null) {
+                    element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
+                    element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
+                    element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
+                    element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
+                }
+            }
+
+            canvas.onclick = function (e) {
+                if (element !== null) {
+                    element = null;
+                    canvas.style.cursor = "default";
+                    console.log("finsihed.");
+                } else {
+                    console.log("begun.");
+                    mouse.startX = mouse.x;
+                    mouse.startY = mouse.y;
+                    element = document.createElement('div');
+                    element.className = 'rectangle'
+                    element.style.left = mouse.x + 'px';
+                    element.style.top = mouse.y + 'px';
+                    canvas.appendChild(element)
+                    canvas.style.cursor = "crosshair";
+                }
+            }
+        }
+        </script>
+</html>
