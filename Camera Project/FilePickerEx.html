@@ -1,9 +1,8 @@
 <!DOCTYPE html><html>
 <head>
     <style>
-    #canvas {
-        width:500px;
-        height:500px;
+    #myCanvas {
+        
         border: 10px solid black;
     }
     .rectangle {
@@ -12,45 +11,52 @@
     }
     </style>
     <script src="ocrad.js"></script>
-    
-    </head>
-<body >
-    <div id="canvas" ></div>
-    <!--<canvas id="myCanvas" onload="onload()" width="500px" height="500px"></canvas>
-    <!--<button onclick="init()" width="100px" height="100px"></button>
-    <input type="file" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|images/*">
-    <img src="numbersTestText.png" id="myimg">-->
-    </body>
-    
+    <script src='https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js'></script>
     <script>
-        function onload() {
-           // var canvas = document.getElementById('myCanvas');
-        //var context = canvas.getContext('2d');
-            
-        }
+        
+        var imageDatas = [];
         function init() {
+            var canvas = document.getElementById('myCanvas');
+            var context = canvas.getContext('2d');
+            var canvasHolder = document.getElementById("canvasHolder");
             
-           
-            /*
-            var img = document.getElementById("myimg");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            context.drawImage(img, 0, 0);
-            var myData = context.getImageData(0, 0, img.width, img.height);
-            var str = OCRAD(myData);
-            var strArray = str.split(" ");
-            console.log(str + " " + strArray.length);
-            for (var s in strArray) {
-                console.log(s + " ");
-            }*/
-        }
-        
-        
-        
-         initDraw(document.getElementById('canvas'));
 
+            var img = document.getElementById('picture');
+            Tesseract.recognize(img)
+                .progress(function  (p) { 
+                    //console.log('progress', p)    
+                })
+                .then(function (result) { 
+                 
+                    result.words.forEach(function (w) {
+                        console.log(w.text);
+                    });
+                    
+                    //console.log(result);
+                })
+            
+            function drawScreen() {
+                
+                canvas.width = img.width;
+                canvas.height = img.height;
+                context.drawImage(img, 0, 0 );
+                
+                console.log(imageDatas.length);
+                if (imageDatas.length > 0) {
+                    var str = OCRAD(imageDatas[0]);
+                    console.log(str);
+                    requestAnimationFrame(drawScreen);
+                }
+            }
+            drawScreen();
+            
+            var mouse = {
+                x: 0,
+                y: 0,
+                startX: 0,
+                startY: 0
+            };
 
-        function initDraw(canvas) {
             function setMousePosition(e) {
                 var ev = e || window.event; //Moz || IE
                 if (ev.pageX) { //Moz
@@ -62,15 +68,11 @@
                 }
             };
 
-            var mouse = {
-                x: 0,
-                y: 0,
-                startX: 0,
-                startY: 0
-            };
-            var element = null;
 
-            canvas.onmousemove = function (e) {
+
+                var element = null;
+
+            canvasHolder.onmousemove = function (e) {
                 setMousePosition(e);
                 if (element !== null) {
                     element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
@@ -80,23 +82,40 @@
                 }
             }
 
-            canvas.onclick = function (e) {
+            canvasHolder.onclick = function (e) {
                 if (element !== null) {
                     element = null;
-                    canvas.style.cursor = "default";
-                    console.log("finsihed.");
+                    canvasHolder.style.cursor = "default";
+                   // var imageDAta = context.getImageData(0, 0, canvas.width, canvas.height);
+                   // var str = OCRAD(imageDAta); console.log(str);
+                  //  console.log("finsihed.");
                 } else {
-                    console.log("begun.");
+                    //console.log("begun.");
                     mouse.startX = mouse.x;
                     mouse.startY = mouse.y;
                     element = document.createElement('div');
                     element.className = 'rectangle'
                     element.style.left = mouse.x + 'px';
                     element.style.top = mouse.y + 'px';
-                    canvas.appendChild(element)
-                    canvas.style.cursor = "crosshair";
+                    canvasHolder.appendChild(element);
+                    canvasHolder.style.cursor = "crosshair";
+                    
                 }
             }
         }
+        
         </script>
+    </head>
+<body onload="init()">
+    <div id="canvasHolder">
+        <canvas id="myCanvas"  ></canvas></div>
+    
+        <img src="numbersTestText.png" id="picture">
+    
+    <!--<button onclick="init()" width="100px" height="100px"></button>
+    <input type="file" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|images/*">
+    <img src="numbersTestText.png" id="myimg">-->
+    </body>
+    
+    
 </html>
