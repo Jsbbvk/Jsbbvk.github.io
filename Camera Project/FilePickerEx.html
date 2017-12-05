@@ -2,7 +2,7 @@
 <head>
     <style>
     #myCanvas {
-        
+       
         border: 10px solid black;
     }
     .rectangle {
@@ -29,7 +29,7 @@
                 .then(function (result) { 
                  
                     result.words.forEach(function (w) {
-                        console.log(w.text);
+                       // console.log(w.text);
                     });
                     
                     //console.log(result);
@@ -81,16 +81,67 @@
                     element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
                 }
             }
-
+            var crop = function(canvas, offsetX, offsetY, width, height, callback) {
+                // create an in-memory canvas
+                var buffer = document.createElement('canvas');
+                var b_ctx = buffer.getContext('2d');
+                // set its width/height to the required ones
+                buffer.width = width;
+                buffer.height = height;
+                // draw the main canvas on our buffer one
+                // drawImage(source, source_X, source_Y, source_Width, source_Height, 
+                //  dest_X, dest_Y, dest_Width, dest_Height)
+                console.log((offsetX + width) + " " + (offsetY + height));
+                b_ctx.drawImage(canvas, offsetX, offsetY, width, height,
+                          0, 0, buffer.width, buffer.height);
+                // now call the callback with the dataURL of our buffer canvas
+                callback(buffer.toDataURL());
+            };
+            
             canvasHolder.onclick = function (e) {
                 if (element !== null) {
                     element = null;
                     canvasHolder.style.cursor = "default";
-                   // var imageDAta = context.getImageData(0, 0, canvas.width, canvas.height);
-                   // var str = OCRAD(imageDAta); console.log(str);
+                    
+                    //TODO only works if you drag from top left to bottom right
+                    //because of the offset (mouse.startX-20) and (mouse.startY-20)
+                    var x = mouse.x; var y = mouse.y; var sX = mouse.startX; var sY = mouse.startY;
+                    var posX = mouse.startX; var poxY = mouse.startY;
+                    if (x >= sX && sY <= y) {
+                        posX = sX; posY = sY;
+                    } else if (x >= sX && sY >= y) {
+                        posX = sX; posY = y;
+                    } else if (x <= sX && sY <= y) {
+                        posY = sY; posX = x;
+                    } else if (x <= sX && sY >= y) {
+                        posY = y; posX = x;
+                    }
+                    
+                    crop(canvas, posX-15, posY-15, Math.abs(mouse.startX-mouse.x), Math.abs(mouse.startY-mouse.y), function(dataURL) {
+                        //var img1 = new Image("url(" + dataURL + ")");
+                        Tesseract.recognize(dataURL)
+                        .progress(function  (p) { 
+                            //console.log('progress', p)    
+                        })
+                        .then(function (result) { 
+                            var arr = [];
+                            result.words.forEach(function (w) {
+                                arr.push(w.text);
+                            });
+                            console.log(arr);
+                            console.log(dataURL);
+                            //console.log(result);
+                        })
+                    });
+
                   //  console.log("finsihed.");
                 } else {
                     //console.log("begun.");
+                    var paras = document.getElementsByClassName('rectangle');
+
+                    while(paras[0]) {
+                        paras[0].parentNode.removeChild(paras[0]);
+                    }
                     mouse.startX = mouse.x;
                     mouse.startY = mouse.y;
                     element = document.createElement('div');
@@ -110,7 +161,7 @@
     <div id="canvasHolder">
         <canvas id="myCanvas"  ></canvas></div>
     
-        <img src="numbersTestText.png" id="picture">
+        <img src="numberEquationTest.png" id="picture">
     
     <!--<button onclick="init()" width="100px" height="100px"></button>
     <input type="file" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|images/*">
