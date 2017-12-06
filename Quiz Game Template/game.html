@@ -1,0 +1,232 @@
+<!DOCTYPE html><html>
+    
+<head>   
+    <style>
+        #myCanvas {
+            border: 1px solid black;
+        }
+    </style>
+<script>
+    //sources: https://scratch.mit.edu/projects/72691440/#editor
+    
+    //player class
+    class Player {
+        constructor(src, x, y, width, height, speed) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.speed = speed;
+            this.img = new Image();
+            this.img.src = src;
+            this.velX = 0;
+            this.velY = 0;
+            this.jumping = false;
+            this.grounded = false;
+            this.waitTimer = 0;
+            this.waitTime = 0;
+        }
+    }
+    
+    //block class
+    class Block {
+        constructor(x, y, width, height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.img = new Image();
+            this.img.src = "https://i.stack.imgur.com/ZcPaO.png";
+        }
+    }
+    
+    //main player
+    var player = new Player("images/Stick Idle1.png", 50, 50, 50, 130, 10);
+    
+    //global attributes
+    var keys = [];
+    var friction = 0.9;
+    var gravity = 0.7;
+    
+    var canvas;
+    var context; var h; var w;
+    
+    //map
+    var temp1 = [
+      [1, 1, 1, 1, 1, 1, 1]  
+    ];
+    function init() {
+        canvas = document.getElementById("myCanvas");
+        context = canvas.getContext("2d");
+        h = canvas.height; w = canvas.width;
+        
+        setUp();
+        drawScreen();
+        
+        window.addEventListener("keydown", keyDown);
+        window.addEventListener("keyup", keyUp);
+    }
+    
+    var blocks = [];
+    function setUp() {
+        for (var i = 0; i < 10; i++) {
+            var block = new Block(i*50, 400, 50, 50);
+            blocks.push(block);
+        }
+    }
+    
+    function keyDown(e) {
+        keys[e.keyCode] = true;
+    }
+        
+    function keyUp(e) {
+        keys[e.keyCode] = false;
+    }
+    
+    function random(min, max) {
+        return Math.floor(Math.random() * (max-min+1) + min);
+    }
+    
+    function drawScreen() {        
+        context.clearRect(0, 0, w, h);
+        
+        if (keys[87]) {
+            //W
+            if(!player.jumping){
+               player.jumping = true;
+               player.velY = -player.speed*2;
+            }
+        }
+        if (keys[68]) {
+            //D
+            if (player.velX < player.speed) {             
+                player.velX++;         
+            }  
+        }
+        if (keys[65]) {
+            //A
+            if (player.velX > -player.speed) {             
+                player.velX--;         
+            }  
+        }
+        /*if (keys[83]) {
+            //S
+            if (player.velY < player.speed) {             
+                player.velY++;         
+            }  
+        }*/
+        player.velX *= friction;
+        player.velY += gravity;
+
+        player.x += player.velX; player.y += player.velY;
+        
+        if (Math.trunc(player.velX) == 0) {
+            player.move = false;
+
+        } else{
+            player.move = true;
+        }
+        
+        if (player.x >= w-player.width) {
+            player.x = w-player.width;
+        } else if (player.x <= 0) {  
+            player.x = 0;
+        }  
+        player.grounded = false;
+        
+        //check collision
+        for (var i = 0; i < blocks.length; i++) {
+            var b = blocks[i];
+            var dir = colCheck(player, b);
+
+            if (dir === "b") {
+                player.grounded = true;
+                player.jumping = false;
+            } else if (dir === "t") {
+                player.velY *= -1;
+            }
+        }
+        
+        if(player.grounded){
+            player.velY = 0;
+        }
+        
+        if (player.move == false) {
+            player.waitTimer++;
+            
+            if (player.waitTimer < player.waitTime) {
+                player.img.src = "images/Stick Idle1.png";
+            } else if (player.waitTimer < player.waitTime + 10) {
+                player.img.src = "images/Stick Idle2.png";
+            } else if (player.waitTimer < player.waitTime + 40) {
+                player.img.src = "images/Stick Idle3.png";
+            } else if (player.waitTimer < player.waitTime + 60) {
+                player.img.src = "images/Stick Idle4.png";
+            } else if (player.waitTimer >= player.waitTime + 80) {
+                player.waitTimer = 0;
+                player.waitTime = random(100, 180);
+            }
+        } else {
+            player.waitTimer = 0;
+            player.waitTime = random(100, 180);
+        }
+        
+        //TODO add other sprite images!!
+        
+        context.drawImage(player.img, player.x, player.y, player.width, player.height);
+        
+        for (var i = 0; i < blocks.length; i++) {
+            var b = blocks[i];
+            context.drawImage(b.img, b.x, b.y, b.width, b.height);
+        }
+        requestAnimationFrame(drawScreen);
+    }
+    
+    
+    
+    
+    function colCheck(shapeA, shapeB, isIBlock) {
+        isIBlock = isIBlock || false;
+        // get the vectors to check against
+        var vX = (shapeA.x + (shapeA.width / 2)) - (shapeB.x + (shapeB.width / 2));
+        var vY = (shapeA.y + (shapeA.height / 2)) - (shapeB.y + (shapeB.height / 2));
+            // add the half widths and half heights of the objects
+        var hWidths = (shapeA.width / 2) + (shapeB.width / 2);
+        var hHeights = (shapeA.height / 2) + (shapeB.height / 2);
+        var colDir = null;
+
+        // if the x and y vector are less than the half width or half height, they we must be inside the object, causing a collision
+        if (Math.abs(vX) < hWidths && Math.abs(vY) < hHeights) {         // figures out on which side we are colliding (top, bottom, left, or right)        
+            var oX = hWidths - Math.abs(vX);         
+            var oY = hHeights - Math.abs(vY);         
+            if (oX >= oY) {
+                if (vY > 0) {
+                    colDir = "t";
+                    shapeA.y += oY;
+                } else {
+                    colDir = "b";
+                    if (!isIBlock) shapeA.y -= oY;
+                }
+            } else {
+                if (vX > 0) {
+                    colDir = "l";
+                    if (!isIBlock) shapeA.x += oX;
+                } else {
+                    colDir = "r";
+                    if (!isIBlock)shapeA.x -= oX;
+                }
+            }
+        }
+        return colDir;
+    }
+    
+</script>
+</head>
+    
+<body onload="init()">
+    <div>
+        <canvas id="myCanvas" width="1000px" height="500px" style="margin: auto; display: block">
+        </canvas>
+    </div>
+</body>
+</html>
