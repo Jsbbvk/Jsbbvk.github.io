@@ -30,6 +30,13 @@
             this.runTime = 10;
             this.direction = "right";
             this.imageName = "Idle Right1";
+            this.isSprinting = false;
+            this.orgW = width;
+            this.orgH = height;
+            this.slideW = width+25;
+            this.slideH = height-25;
+            this.isSliding = false;
+            
         }
     }
     
@@ -46,7 +53,7 @@
     }
     
     //main player
-    var player = new Player("images/Idle Right/Stick Idle1.png", 50, 50, 15, 40, 4);
+    var player = new Player("images/Idle Right/Stick Idle1.png", 50, 50, 17, 47, 4);
     
     //global attributes
     var keys = [];
@@ -86,8 +93,21 @@
         [0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0]  
     ];
     
+    var map3 = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1],
+        [0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0],
+        [0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0]  
+    ];
     
-    var worldMap = [map1, map2];
+    
+    var worldMap = [map1, map2, map3];
     var worldMapCounter = 0;
     
     //holds all game objects
@@ -163,6 +183,8 @@
         var runR4 = new Image(); runR4.src = "images/Run Right/Stick Run4.png"; playerImgs["Run Right4"] = runR4;
         var runR5 = new Image(); runR5.src = "images/Run Right/Stick Run5.png"; playerImgs["Run Right5"] = runR5;
         
+        var slideL = new Image(); slideL.src = "images/Sliding/Stick Sliding Left.png"; playerImgs["Slide Left"] = slideL;
+        var slideR = new Image(); slideR.src = "images/Sliding/Stick Sliding Right.png"; playerImgs["Slide Right"] = slideR;
         
     }
     
@@ -180,20 +202,23 @@
     
     function drawScreen() {        
         context.clearRect(0, 0, w, h);
-        
+        player.isSprinting = false;
         if (keys[87]) {
             //W
             if(!player.jumping && player.velY <= 0){
                player.jumping = true;
                player.velY = -player.speed*2;
             }
+            player.isSprinting = false;
         }
         if (keys[68]) {
             //D
-            player.direction = "right";
+            player.direction = "right";                
             if (player.velX < player.speed) {             
                 player.velX++;         
             }  
+            
+            player.isSprinting = true;
         }
         if (keys[65]) {
             //A
@@ -201,13 +226,16 @@
             if (player.velX > -player.speed) {             
                 player.velX--;         
             }  
-        }
-        /*if (keys[83]) {
+            player.isSprinting = true;
+        } 
+        if (keys[83]) {
             //S
-            if (player.velY < player.speed) {             
-                player.velY++;         
-            }  
-        }*/
+            if (player.jumping && player.velY <= maxGravity) {
+                player.velY += gravity;
+            }
+        }
+        
+        if (player.jumping) player.isSprinting = false;
         
         //calculate player movements
         
@@ -232,7 +260,7 @@
         }  
         
         player.grounded = false;
-        
+        player.isClimbing = false;
         //check collision
         for (var i = 0; i < worldObjs.length; i++) {
             for (var j = 0; j < worldObjs[i].length; j++) {
@@ -243,15 +271,15 @@
                     //if (dir != null && dir != "b") console.log(dir);
                     if (dir === "l" || dir === "r") {
                         player.velX = 0;
-
-                        //turns off wall jumping
+                        console.log("WHAT??");
+                        //toggle wall jumping
                         //player.jumping = false;
-
                     }else if (dir === "b") {
                         player.grounded = true;
                         player.jumping = false;
                     } else if (dir === "t") {
                         if (player.velY <= 0) player.velY = 0;
+                        
                     }
                 }
             }
@@ -337,6 +365,22 @@
                 player.imageName = "Fall Right";
             } else if (player.direction == "left") player.imageName = "Jump Left";
         }       
+        
+        player.height = player.orgH; player.width = player.orgW;
+        /*
+        if (keys[83]) {
+            //S
+            if(player.isSprinting) {
+                if (player.direction == "right") {
+                    player.imageName = "Slide Right";
+                } else if (player.direction == "left") {
+                    player.imageName = "Slide Left";
+                }
+                player.height = player.slideH;
+                player.width = player.slideW;
+            }
+        }*/
+        
         
         //falls out of world
         if (player.y > h) {
