@@ -14,14 +14,153 @@
     <script src='https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js'></script>
     <script>
         
+        
         var imageDatas = [];
-        function init() {
-            var canvas = document.getElementById('myCanvas');
-            var context = canvas.getContext('2d');
-            var canvasHolder = document.getElementById("canvasHolder");
-            
+        var canvas;
+        var context;
+        
+        function checkIfBlack(pixel, threshold) {
+            console.log("A");
+            threshold = threshold || 200;
 
+            for(var i=0; i<3; i++) {
+                if(pixel[i] > threshold) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
+        function clearLines() {
+            var img = context.getImageData(0, 0, canvas.width, canvas.height);
+            console.log(img);
+            
+            
+            /*
+            for(var i=0; i<img.width; i++){
+                var isBlack = true;
+                for(var j=0; j<img.height; j++){
+                   //console.log(i*img.width+j);
+                    console.log(img[i*img.width]);
+                    if (pixel >= 200) {
+                        img[i*img.width+j] = 255;
+                    }
+                   
+                    
+                }
+//                if (isBlack == true) {  
+//                    for(var j=0; j<img.height; j++){
+//                        for(var k=0; k<4; k++){
+//                            img[i * img.width + j + k] = 255;
+//                        }
+//                    }
+//                }
+                
+            }
+
+            for(var i=0; i<img.height; i++){
+                var isBlack;
+                for(var j=0; j<img.width; j++){
+                    var pixel = img[i + j * img.width];
+                    if (pixel >= 200) {
+                        img[i+j*img.width] = 255;
+                    }
+                    
+                }
+//                if (isBlack == true) {
+//                        for(var j=0; j<img.height; j++){
+//                            for(var k=0; k<4; k++){
+//                                img[i + j * img.width + k] = 255;
+//                            }
+//                        }
+//                    }
+//                
+            }
+            
+            */
+            
+            var w = img.height;
+            var notBlack = true;
+            
+            var numBlack = 0;
+            var nonBlack = 0;
+            for (var i = 0; i < img.height*100; i++) {
+                //console.log(img.data[i]);  
+                //img.data[i] = 100;
+            }
+            for (var i = 0; i < img.data.length; i+=4) {
+                w--;
+                var red = img.data[i]; //red
+                var green = img.data[i+1]; // green
+                var blue = img.data[i+2]; // blue
+                if (red <= 200 && blue <= 200 && green <= 200) {
+                    //img.data[i] = 255;
+                    //img.data[i+1] = 255;
+                    //img.data[i+2] = 255;
+                    numBlack++;
+                } else {
+                    nonBlack++;
+                }
+                
+                if (w <= 0) {
+                    w = img.width;
+                    console.log(notBlack);
+                    if (numBlack >= nonBlack) {
+                        for (var j = i-img.width*4; j <= i; j+=4) {
+                            img.data[j] = 255;
+                            img.data[j+1] = 255;
+                            img.data[j+2] = 255;
+                        }
+                        nonBlack = 0;
+                        numBlack = 0;
+                    }
+                    
+                }
+            }
+            /*
+            for (var y = 0; y < canvas.height; y++) {
+                for (var x = 0; x < canvas.width; x+=3) {
+                    var idx = y*canvas.width + x;   
+                    var red = img[idx]; //red
+                    var green = img[idx+1]; // green
+                    var blue = img[idx+2]; // blue
+                    
+                    //if (red <= 100 || green <= 100 || blue <= 100) {
+                    //img.data[i+3] = 0;
+                            img[idx] = 255;
+                            img[idx+1] = 255;
+                            img[idx+2] = 255;
+                        
+                    
+                }
+            }
+            /*
+            for (var i = 0; i < img.data.length; i += 4) {
+                var red = img.data[i]; //red
+                var green = img.data[i+1]; // green
+                var blue = img.data[i+2]; // blue
+
+                if (red <= 100 && green <= 100 && blue <= 100) {
+                    //img.data[i+3] = 0;
+                    img.data[i] = 255;
+                    img.data[i+1] = 255;
+                    img.data[i+2] = 255;
+                }
+            }*/
+            var img1 = new Image(img);
+            context.putImageData(img, 0, 0);
+        }
+        
+        
+        function init() {
+            canvas = document.getElementById('myCanvas');
+            context = canvas.getContext('2d');
+            canvasHolder = document.getElementById("canvasHolder");
+            
+            
             var img = document.getElementById('picture');
+            //scans pic first
             Tesseract.recognize(img)
                 .progress(function  (p) { 
                     //console.log('progress', p)    
@@ -29,7 +168,7 @@
                 .then(function (result) { 
                  
                     result.words.forEach(function (w) {
-                       // console.log(w.text);
+                        console.log(w.text);
                     });
                     
                     //console.log(result);
@@ -43,8 +182,8 @@
                 
                 console.log(imageDatas.length);
                 if (imageDatas.length > 0) {
-                    var str = OCRAD(imageDatas[0]);
-                    console.log(str);
+                    //var str = OCRAD(imageDatas[0]);
+                    //console.log(str);
                     requestAnimationFrame(drawScreen);
                 }
             }
@@ -98,6 +237,7 @@
                 callback(buffer.toDataURL());
             };
             
+            //draws rectangle   
             canvasHolder.onclick = function (e) {
                 if (element !== null) {
                     element = null;
@@ -117,6 +257,7 @@
                         posY = y; posX = x;
                     }
                     
+                    //scanning the cropped img
                     crop(canvas, posX-15, posY-15, Math.abs(mouse.startX-mouse.x), Math.abs(mouse.startY-mouse.y), function(dataURL) {
                         //var img1 = new Image("url(" + dataURL + ")");
                         Tesseract.recognize(dataURL)
@@ -129,8 +270,8 @@
                                 arr.push(w.text);
                             });
                             console.log(arr);
-                            console.log(dataURL);
-                            //console.log(result);
+                            //console.log(dataURL);
+                            console.log(result);
                         })
                     });
 
@@ -160,8 +301,8 @@
 <body onload="init()">
     <div id="canvasHolder">
         <canvas id="myCanvas"  ></canvas></div>
-    
-        <img src="numberEquationTest.png" id="picture">
+        <button onclick="clearLines()">Clear me</button>
+        <img src="dataTable.jpg" id="picture">
     
     <!--<button onclick="init()" width="100px" height="100px"></button>
     <input type="file" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|images/*">

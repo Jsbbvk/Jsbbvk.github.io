@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html><head>
+     <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+<script>
+    function PlayerOneObj(onXPosChange) {
+        this.xPos = 250;
+        
+        function setXPos(newXPos) {
+            this.xPos = newXPos;
+            if (onXPosChange) {
+                onXPosChange();
+            }
+        }
+    }
+    
+    function PlayerTwoObj(onXPosChange) {
+        this.xPos = 250;
+        
+        function setXPos(newXPos) {
+            this.xPos = newXPos;
+            if (onXPosChange) {
+                onXPosChange();
+            }
+        }
+    }
+    
+    class PongBall {
+        constructor() {
+            this.img = new Image();
+            this.src = "http://www.clker.com/cliparts/y/7/W/m/R/5/transparent-black-circle-hi.png";
+            this.img.src = this.src;
+            
+            this.x = 250;
+            this.y = 250;
+            this.width = 50;
+            this.height = 50;
+            this.speed = Math.round(Math.random()*(4))+2;
+            this.velX = this.speed;
+            this.velY = this.speed;
+        }
+    }
+    
+    var BallP = new PongBall();
+    var PlayerOne = new PlayerOneObj();
+    var PlayerTwo = new PlayerTwoObj();
+    
+</script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCW3dtud0dDUhb_P9RRwP2F0FHEkPaeEkY",
+    authDomain: "pongdemo-9b60a.firebaseapp.com",
+    databaseURL: "https://pongdemo-9b60a.firebaseio.com",
+    projectId: "pongdemo-9b60a",
+    storageBucket: "pongdemo-9b60a.appspot.com",
+    messagingSenderId: "139608990381"
+  };
+  firebase.initializeApp(config);
+    
+    var amIPlayerOneOrTwo = 0;
+    var I_Am_Player_One = 1;
+    var I_Am_Player_Two = 2;
+    
+    var p1XPos;
+    var p2XPos;
+    
+    var database = firebase.database();
+    //future note: add ID for multiple rooms
+    var room = database.ref().child("Room");
+    
+    function startFirebaseDataCollection() {
+        room.ref.once("value").then(function(snapshot) {
+            //looping through each room
+            snapshot.forEach(function(childSnapShot) {
+                //looping through each player 
+
+                //console.log(childSnapShot.val());
+                if (childSnapShot.key == "Player1" || childSnapShot.key == "Player2") {
+                    childSnapShot.ref.on("value", function(snap) {
+                        onChange(snap);
+                    }); //database.ref().child("Room").child(childSnapShot.key)
+                }
+                if (childSnapShot.key == "ReadyP1" && childSnapShot.val() == false && amIPlayerOneOrTwo == 0) {
+                    amIPlayerOneOrTwo = I_Am_Player_One;
+                    room.update({"ReadyP1" : true});
+                } else if (childSnapShot.key == "ReadyP2" && childSnapShot.val() == false && amIPlayerOneOrTwo == 0) {
+                    amIPlayerOneOrTwo = I_Am_Player_Two;
+                    room.update({"ReadyP2" : true});
+                }
+                
+            });
+        });
+    }
+    
+    function updateFirebaseCollection() {
+        if (amIPlayerOneOrTwo == I_Am_Player_One) room.update({"Player1" : PlayerOne.xPos});
+        if (amIPlayerOneOrTwo == I_Am_Player_Two) room.update({"Player2" : PlayerTwo.xPos});
+    }
+    
+    function onChange(xPos) {
+        //get parent xPos.ref.parent.key
+        
+        var player = xPos.key;
+        var val = xPos.val();
+        //console.log(player);
+        if (player == "Player1") {
+            PlayerOne.xPos = xPos.val();
+            document.getElementById("Player1").innerHTML = "Player 1: " + val;
+        } else if (player == "Player2") {
+            PlayerTwo.xPos = xPos.val();
+            document.getElementById("Player2").innerHTML = "Player 2: " + val;
+        }
+    
+    }
+    
+    function resetPlayerOneTwo() {
+        room.update({"ReadyP1" : false});
+        room.update({"ReadyP2" : false});
+        console.log("Updated!");
+        
+        PlayerOne.xPos = 250;
+        PlayerTwo.xPos = 250;
+        document.getElementById("Player1").innerHTML = "Player 1: 250";
+        document.getElementById("Player2").innerHTML = "Player 2: 250";
+        startFirebaseDataCollection();
+    }
+</script>
+    
+<script>
+    var canvas;
+    var context;
+    var keys = [];
+    function init() {
+        PlayerOne.xPos = 250;
+        PlayerTwo.xPos = 250;
+        startFirebaseDataCollection();
+        
+        canvas = document.getElementById("myCanvas");
+        context = canvas.getContext("2d");
+        
+        window.addEventListener("keydown", keyDown);
+        window.addEventListener("keyup", keyUp);
+        drawScreen();       
+        
+    }
+    
+    function keyUp(e) {
+        keys[e.keyCode] = false;
+    }
+    
+    function keyDown(e) {
+        keys[e.keyCode] = true; 
+    }
+    
+    function drawScreen() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (amIPlayerOneOrTwo == I_Am_Player_One) {
+            if (keys[65]) {
+                //A
+                PlayerOne.xPos -= 5;
+            } 
+            if (keys[68]) {
+                //D
+                PlayerOne.xPos += 5;
+            }
+        }
+        if (amIPlayerOneOrTwo == I_Am_Player_Two) {
+            if (keys[37]) {
+                //left arrow key
+                PlayerTwo.xPos -= 5;
+            } 
+            if (keys[39]) {
+                //right arrow key
+                PlayerTwo.xPos += 5;
+            }
+        }
+        
+        //bounds 
+        //hardcoded to the rectangle's width (change later)
+        if (PlayerOne.xPos -50 < 0) {
+            PlayerOne.xPos = 50;
+        } else if (PlayerOne.xPos+50 > canvas.width) {
+            PlayerOne.xPos = canvas.width - 50;
+        }
+        
+        console.log(PlayerOne.xPos);
+        
+        if (PlayerTwo.xPos -50 < 0) {
+            PlayerTwo.xPos = 50;
+        } else if (PlayerTwo.xPos+50 > canvas.width) {
+            PlayerTwo.xPos = canvas.width - 50;
+        }
+        
+        //Checking Ball's bounds
+        if (BallP.x - BallP.width/2< 0) {
+            BallP.x = BallP.width/2;
+            BallP.velX *= -1;
+        } else if (BallP.x + BallP.width/2> canvas.width) {
+            BallP.x = canvas.width - BallP.width/2;
+            BallP.velX *= -1;
+        }
+        
+        if (BallP.y - BallP.height/2< 0) {
+            BallP.y = BallP.height/2;
+            BallP.velY *= -1;
+        } else if (BallP.y + BallP.height/2 > canvas.height) {
+            BallP.y = canvas.height - BallP.height/2;
+            BallP.velY *= -1;
+        }
+        
+        
+        
+        BallP.x += BallP.velX;
+        BallP.y += BallP.velY;
+        
+        updateFirebaseCollection();
+        
+        context.fillRect(PlayerOne.xPos-50, 0, 100, 25);
+        context.fillRect(PlayerTwo.xPos-50, 475, 100, 25);
+
+        context.drawImage(BallP.img, BallP.x-BallP.width/2, BallP.y-BallP.height/2, BallP.width, BallP.height);
+        
+        requestAnimationFrame(drawScreen);
+    }
+    
+    
+    
+</script>
+</head>
+<body onload="init()">
+    
+    <div><canvas id="myCanvas" width="500px" height="500px" style="border: 1px solid black">
+    
+    </canvas>
+    </div>
+    
+    <p id="Player1">Player 1: </p>
+    <br><br>
+    <p id="Player2">Player 2: </p>
+    
+</body></html>
