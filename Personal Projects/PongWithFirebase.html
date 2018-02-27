@@ -116,6 +116,8 @@
     function resetPlayerOneTwo() {
         room.update({"ReadyP1" : false});
         room.update({"ReadyP2" : false});
+        room.update({"Player1" : 250});
+        room.update({"Player1" : 250});
         console.log("Updated!");
         
         PlayerOne.xPos = 250;
@@ -238,5 +240,8 @@
     <p id="Player1">Player 1: </p>
     <br><br>
     <p id="Player2">Player 2: </p>
+    
+    <br><br>
+    <button onclick="resetPlayerOneTwo()">Reset Game</button>
     
 </body></html>
