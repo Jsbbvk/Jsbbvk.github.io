@@ -4,7 +4,9 @@
 <script>
     function PlayerOneObj(onXPosChange) {
         this.xPos = 250;
-        
+        this.yPos = 50;
+        this.width = 100;
+        this.height = 10;
         function setXPos(newXPos) {
             this.xPos = newXPos;
             if (onXPosChange) {
@@ -15,7 +17,9 @@
     
     function PlayerTwoObj(onXPosChange) {
         this.xPos = 250;
-        
+        this.yPos =425; 
+        this.width = 100;
+        this.height = 10;
         function setXPos(newXPos) {
             this.xPos = newXPos;
             if (onXPosChange) {
@@ -34,10 +38,14 @@
             this.y = 250;
             this.width = 50;
             this.height = 50;
-            this.speed = Math.round(Math.random()*(4))+2;
+            this.speed = Math.round(Math.random()*(2))+1;
+            this.speedMultiplier = 1.2;
             this.velX = this.speed;
-            this.velY = this.speed;
+            this.velY = -this.speed;
+            this.touchedPaddle = false; //work on this. find better way to determine touchedPaddle = false
+            //maybe if the yPos is between the two paddles.
         }
+        
     }
     
     var BallP = new PongBall();
@@ -180,18 +188,18 @@
         
         //bounds 
         //hardcoded to the rectangle's width (change later)
-        if (PlayerOne.xPos -50 < 0) {
-            PlayerOne.xPos = 50;
-        } else if (PlayerOne.xPos+50 > canvas.width) {
-            PlayerOne.xPos = canvas.width - 50;
+        if (PlayerOne.xPos -PlayerOne.width/2 < 0) {
+            PlayerOne.xPos = PlayerOne.width/2;
+        } else if (PlayerOne.xPos+PlayerOne.width/2 > canvas.width) {
+            PlayerOne.xPos = canvas.width - PlayerOne.width/2;
         }
         
-        console.log(PlayerOne.xPos);
         
-        if (PlayerTwo.xPos -50 < 0) {
-            PlayerTwo.xPos = 50;
-        } else if (PlayerTwo.xPos+50 > canvas.width) {
-            PlayerTwo.xPos = canvas.width - 50;
+        
+        if (PlayerTwo.xPos -PlayerTwo.width < 0) {
+            PlayerTwo.xPos = PlayerTwo.width;
+        } else if (PlayerTwo.xPos+PlayerTwo.width > canvas.width) {
+            PlayerTwo.xPos = canvas.width - PlayerTwo.width;
         }
         
         //Checking Ball's bounds
@@ -212,14 +220,77 @@
         }
         
         
+        //checking if the ball came in contact with the paddles
+        //problem, in one frame, the ball travels into the paddle.
+        if (!BallP.touchedPaddle) {
+            if (amIPlayerOneOrTwo == I_Am_Player_One) {
+                if (BallP.y - BallP.height/2 <= PlayerOne.yPos+PlayerOne.height/2) {
+                    if (BallP.x + BallP.width/2 >= PlayerOne.xPos-PlayerOne.width /2
+                       && BallP.x - BallP.width/2 <= PlayerOne.xPos+PlayerOne.width/2) {
+                        BallP.velY *= -1;
+
+                        
+                        var position = (PlayerOne.xPos - BallP.x > 0) ? "left" : "right";
+                        var distance = (position == "right") ? (BallP.x - PlayerOne.xPos) : (PlayerOne.xPos-BallP.x);
+                        if (distance >= PlayerOne.width / 4) {
+                            BallP.velX *= 1.6;
+                            console.log(BallP.velX);
+                            if (position == "left" && BallP.velX > 0) BallP.velX *= -1;
+                            else if (position == "right" && BallP.velX < 0) BallP.velX *= -1;
+                        } else if (distance >= PlayerOne.width / 6) {
+                            BallP.velX *= 1.4;
+                            if (position == "left" && BallP.velX > 0) BallP.velX *= -1;
+                            else if (position == "right" && BallP.velX < 0) BallP.velX *= -1;
+                        } else if (distance >= PlayerOne.width/ 9){
+                            BallP.velX *= 1.2;
+                        }
+
+                        if (Math.abs(BallP.velX) >= BallP.speed*2) 
+                            BallP.velX = BallP.speed * 2 * (BallP.velX / Math.abs(BallP.velX));
+
+                        if (Math.abs(BallP.velY) < BallP.speed*2) BallP.velY *= BallP.speedMultiplier;
+                        BallP.touchedPaddle = true;
+                    }
+                } else BallP.touchedPaddle = false;
+            } else if (amIPlayerOneOrTwo == I_Am_Player_Two) {
+                if (BallP.y +BallP.height/2 >= PlayerTwo.yPos-PlayerTwo.height/2) {
+                    if (BallP.x + BallP.width/2 >= PlayerTwo.xPos-PlayerTwo.width/2 
+                       && BallP.x - BallP.width/2 <= PlayerTwo.xPos+PlayerTwo.width/2) {
+                        BallP.velY *= -1;
+
+                       var distance = Math.abs(BallP.x - PlayerTwo.xPos);
+
+                        var position = (PlayerTwo.xPos - BallP.x > 0) ? "left" : "right";
+                        if (distance >= PlayerTwo.width * 3 / 5) {
+                            BallP.velX *= 1.6;
+                            if (position == "left" && BallP.velX > 0) BallP.velX *= -1;
+                            else if (position == "right" && BallP.velX < 0) BallP.velX *= -1;
+                        } else if (distance >= PlayerTwo.width*2 / 5) {
+                            BallP.velX *= 1.4;
+                            if (position == "left" && BallP.velX > 0) BallP.velX *= -1;
+                            else if (position == "right" && BallP.velX < 0) BallP.velX *= -1;
+                        } else if (distance >= PlayerTwo.width / 5){
+                            BallP.velX *= 1.2;
+                        }
+
+                        if (Math.abs(BallP.velX) >= BallP.speed*2) 
+                            BallP.velX = BallP.speed * 2 * (BallP.velX / Math.abs(BallP.velX));
+
+                        if (Math.abs(BallP.velY) < BallP.speed*2) BallP.velY *= BallP.speedMultiplier;
+                        BallP.touchedPaddle = true;
+                    }
+                } else BallP.touchedPaddle = false;
+            }
+        }
+        if (BallP.touchedPaddle) BallP.touchedPaddle = false;
         
         BallP.x += BallP.velX;
         BallP.y += BallP.velY;
         
         updateFirebaseCollection();
         
-        context.fillRect(PlayerOne.xPos-50, 0, 100, 25);
-        context.fillRect(PlayerTwo.xPos-50, 475, 100, 25);
+        context.fillRect(PlayerOne.xPos-PlayerOne.width/2, PlayerOne.yPos, PlayerOne.width, PlayerOne.height);
+        context.fillRect(PlayerTwo.xPos-PlayerTwo.width/2, PlayerTwo.yPos, PlayerTwo.width, PlayerTwo.height);
 
         context.drawImage(BallP.img, BallP.x-BallP.width/2, BallP.y-BallP.height/2, BallP.width, BallP.height);
         
