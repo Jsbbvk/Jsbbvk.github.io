@@ -12,7 +12,7 @@
 # About the Coder: 
  *Cupertino HS 2020  
    
- # Take a preview of my product for FBLA's Computer Programming and Game Simulation compeition  
+ # Product for FBLA's Computer Programming and Game Simulation compeition:  
  [MacOS version download](http://bit.ly/FBLA2K18mac)  
  [Windows version download](http://bit.ly/FBLA2K18windows)
 
