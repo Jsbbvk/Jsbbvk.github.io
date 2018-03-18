@@ -1,0 +1,200 @@
+<!DOCTYPE html><html>
+<head>
+    <style>
+    #myCanvas {
+       
+        border: 10px solid black;
+    }
+    .rectangle {
+        border: 1px solid #FF0000;
+        position: absolute;
+    }
+    </style>
+    <script src="ocrad.js"></script>
+    <script src='https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js'></script>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    
+    <script>
+        
+        //Resources:
+        /*
+        https://community.wolfram.com/groups/-/m/t/1071854
+            
+        */
+        var imageDatas = [];
+        var canvas;
+        var context;
+       
+        var wolfAPI1 = "https://api.wolframalpha.com/v2/query?appid=YWPHT6-9YJUE8A455&input=";
+        var wolfAPI2 = "%3D11&podstate=Step-by-step%20solution";
+        var appID = "YWPHT6-9YJUE8A455";
+        
+        function calculate() {
+            var equation = document.getElementById("equation").value;
+            console.log(equation);
+            //WolframAlpha wolfram = new WolframAlpha(appID);
+            //QueryResult res = wolfram.Query("1+1");
+            
+            document.getElementById("answer").innerHTML = "Result: -2/5";
+        }
+        
+        function init() {
+            canvas = document.getElementById('myCanvas');
+            context = canvas.getContext('2d');
+            canvasHolder = document.getElementById("canvasHolder");
+            
+            
+            var img = document.getElementById('picture');
+            canvas.width = window.innerWidth/2;
+            canvas.height = window.innerHeight;
+            
+            img.style.visibility = "collapse";
+            //scans pic first
+            
+            
+            function drawScreen() {
+                
+                
+                context.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                if (imageDatas.length > 0) {
+                    //var str = OCRAD(imageDatas[0]);
+                    //console.log(str);
+                    requestAnimationFrame(drawScreen);
+                }
+            }
+            drawScreen();
+            
+            var mouse = {
+                x: 0,
+                y: 0,
+                startX: 0,
+                startY: 0
+            };
+
+            function setMousePosition(e) {
+                var ev = e || window.event; //Moz || IE
+                if (ev.pageX) { //Moz
+                    mouse.x = ev.pageX + window.pageXOffset;
+                    mouse.y = ev.pageY + window.pageYOffset;
+                } else if (ev.clientX) { //IE
+                    mouse.x = ev.clientX + document.body.scrollLeft;
+                    mouse.y = ev.clientY + document.body.scrollTop;
+                }
+            };
+
+
+
+                var element = null;
+
+            canvasHolder.onmousemove = function (e) {
+                setMousePosition(e);
+                if (element !== null) {
+                    element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
+                    element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
+                    element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
+                    element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
+                }
+            }
+            var crop = function(canvas, offsetX, offsetY, width, height, callback) {
+                // create an in-memory canvas
+                var buffer = document.createElement('canvas');
+                var b_ctx = buffer.getContext('2d');
+                // set its width/height to the required ones
+                buffer.width = width;
+                buffer.height = height;
+                // draw the main canvas on our buffer one
+                // drawImage(source, source_X, source_Y, source_Width, source_Height, 
+                //  dest_X, dest_Y, dest_Width, dest_Height)
+                //console.log((offsetX + width) + " " + (offsetY + height));
+                b_ctx.drawImage(canvas, offsetX, offsetY, width, height,
+                          0, 0, buffer.width, buffer.height);
+                // now call the callback with the dataURL of our buffer canvas
+                callback(buffer.toDataURL());
+            };
+            
+            //draws rectangle   
+            canvasHolder.onclick = function (e) {
+                if (element !== null) {
+                    element = null;
+                    canvasHolder.style.cursor = "default";
+                    
+                    //TODO only works if you drag from top left to bottom right
+                    //because of the offset (mouse.startX-20) and (mouse.startY-20)
+                    var x = mouse.x; var y = mouse.y; var sX = mouse.startX; var sY = mouse.startY;
+                    var posX = mouse.startX; var poxY = mouse.startY;
+                    if (x >= sX && sY <= y) {
+                        posX = sX; posY = sY;
+                    } else if (x >= sX && sY >= y) {
+                        posX = sX; posY = y;
+                    } else if (x <= sX && sY <= y) {
+                        posY = sY; posX = x;
+                    } else if (x <= sX && sY >= y) {
+                        posY = y; posX = x;
+                    }
+                    
+                    //scanning the cropped img
+                    crop(canvas, posX-15, posY-15, Math.abs(mouse.startX-mouse.x), Math.abs(mouse.startY-mouse.y), function(dataURL) {
+                        console.log(dataURL);
+                        Tesseract.recognize(dataURL)
+                        .progress(function  (p) {
+                            
+                        })
+                        .then(function (result) { 
+                            console.log(result);
+                            var arr = [];
+                            result.words.forEach(function (w) {
+                                arr.push(w.text);
+                            });
+                          document.getElementById("equation").value = arr[0];   
+                        })
+                    });
+
+                  //  console.log("finsihed.");
+                } else {
+                    //console.log("begun.");
+                    var paras = document.getElementsByClassName('rectangle');
+
+                    while(paras[0]) {
+                        paras[0].parentNode.removeChild(paras[0]);
+                    }
+                    mouse.startX = mouse.x;
+                    mouse.startY = mouse.y;
+                    element = document.createElement('div');
+                    element.className = 'rectangle'
+                    element.style.left = mouse.x + 'px';
+                    element.style.top = mouse.y + 'px';
+                    canvasHolder.appendChild(element);
+                    canvasHolder.style.cursor = "crosshair";
+                    
+                }
+            }
+        }
+        
+        </script>
+    </head>
+<body onload="init()">
+    <div id="canvasHolder">
+        <canvas id="myCanvas" style="max-height: 100%"></canvas>
+        <img src="math_equation_1.gif" id="picture">
+    </div>
+    <br>
+    
+    <!--<div id="displayValues">
+        <input type="text" id="math_question" size="50" value="Equation">
+    </div>-->
+    
+    <input type="text" id="equation" size="50" value="Equation">
+   
+    <button onclick="calculate()">Get Result</button>
+    <br>
+    <!--<div id="displayCards">
+    
+    </div>-->
+    <br>
+    <h2 id="answer">Result</h2>
+    <input type="file" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|images/*">
+    </body>
+    
+    
+</html>
