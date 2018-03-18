@@ -10,10 +10,7 @@
         position: absolute;
     }
     </style>
-    <script src="ocrad.js"></script>
     <script src='https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js'></script>
-    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
-    
     <script>
         
         //Resources:
@@ -24,19 +21,7 @@
         var imageDatas = [];
         var canvas;
         var context;
-       
-        var wolfAPI1 = "https://api.wolframalpha.com/v2/query?appid=YWPHT6-9YJUE8A455&input=";
-        var wolfAPI2 = "%3D11&podstate=Step-by-step%20solution";
-        var appID = "YWPHT6-9YJUE8A455";
-        
-        function calculate() {
-            var equation = document.getElementById("equation").value;
-            console.log(equation);
-            //WolframAlpha wolfram = new WolframAlpha(appID);
-            //QueryResult res = wolfram.Query("1+1");
             
-            document.getElementById("answer").innerHTML = "Result: -2/5";
-        }
         
         function init() {
             canvas = document.getElementById('myCanvas');
@@ -45,16 +30,22 @@
             
             
             var img = document.getElementById('picture');
-            canvas.width = window.innerWidth/2;
-            canvas.height = window.innerHeight;
-            
-            img.style.visibility = "collapse";
             //scans pic first
-            
+            Tesseract.recognize(img)
+                .progress(function  (p) { 
+                    //console.log('progress', p)    
+                })
+                .then(function (result) { 
+                 
+                    result.words.forEach(function (w) {
+                      //  console.log(w.text);
+                    });
+                    
+                    //console.log(result);
+                })
             
             function drawScreen() {
-                
-                
+            
                 context.drawImage(img, 0, 0, canvas.width, canvas.height);
                 
                 if (imageDatas.length > 0) {
@@ -119,8 +110,6 @@
                     element = null;
                     canvasHolder.style.cursor = "default";
                     
-                    //TODO only works if you drag from top left to bottom right
-                    //because of the offset (mouse.startX-20) and (mouse.startY-20)
                     var x = mouse.x; var y = mouse.y; var sX = mouse.startX; var sY = mouse.startY;
                     var posX = mouse.startX; var poxY = mouse.startY;
                     if (x >= sX && sY <= y) {
@@ -135,18 +124,17 @@
                     
                     //scanning the cropped img
                     crop(canvas, posX-15, posY-15, Math.abs(mouse.startX-mouse.x), Math.abs(mouse.startY-mouse.y), function(dataURL) {
-                        console.log(dataURL);
                         Tesseract.recognize(dataURL)
                         .progress(function  (p) {
-                            
                         })
                         .then(function (result) { 
-                            console.log(result);
                             var arr = [];
                             result.words.forEach(function (w) {
                                 arr.push(w.text);
                             });
-                          document.getElementById("equation").value = arr[0];   
+                            console.log(arr);
+                            
+                            //console.log(result);
                         })
                     });
 
@@ -174,25 +162,14 @@
         </script>
     </head>
 <body onload="init()">
-    <div id="canvasHolder">
-        <canvas id="myCanvas" style="max-height: 100%"></canvas>
-        <img src="math_equation_1.gif" id="picture">
+    <div id="canvasHolder" >
+        <canvas id="myCanvas"></canvas></div>
+        <img src="vocab_2.jpg" id="picture" >
+    <br><br><br>
+    <div id="displayValues" style="visibility: collapse">
+    
     </div>
-    <br>
-    
-    <!--<div id="displayValues">
-        <input type="text" id="math_question" size="50" value="Equation">
-    </div>-->
-    
-    <input type="text" id="equation" size="50" value="Equation">
-   
-    <button onclick="calculate()">Get Result</button>
-    <br>
-    <!--<div id="displayCards">
-    
-    </div>-->
-    <br>
-    <h2 id="answer">Result</h2>
+    <br><br>
     <input type="file" accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|images/*">
     </body>
     
