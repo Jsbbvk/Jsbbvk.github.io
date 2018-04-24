@@ -126,7 +126,9 @@ var leftTimer, rightTimer, upTimer;
 function init() {
     document.getElementById("myCanvas").addEventListener("mousemove", mouseMove);
 	document.getElementById("myCanvas").addEventListener("mousedown", mouseDown);
-    
+   	 $(document).bind("contextmenu",function(e) {
+	 e.preventDefault();
+	});
     
     onTick();
     perSec();
