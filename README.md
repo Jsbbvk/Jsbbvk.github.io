@@ -10,7 +10,7 @@
  (Wait around 10 seconds for the game to load in sprites)
  
  # Check out some projects that I made!
- [Easy Speak](https://easyspeak.tech) 
+ [Easy Speak](https://www.easyspeak.tech) 
  
 # About the Coder: 
  *Cupertino HS 2020  
