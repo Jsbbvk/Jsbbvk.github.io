@@ -1,0 +1,129 @@
+<!DOCTYPE html> <html>
+<head>
+    
+</head>
+<body onload="init()">
+    <script>
+        var nums = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        var numbersToDisplay = [];
+        var keys = [];
+        
+        var size = 100;
+        var acc = 0;
+        var correct = 0;
+        var attempts = 0;
+        
+        var down = true;
+        
+        function init() {
+            var canvas = document.getElementById("canvas");
+            var context = canvas.getContext("2d");
+            context.font = "30px Verdana";
+            
+            window.addEventListener("keyup", keyUp);
+            
+            function drawScreen() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (var i = 0; i < numbersToDisplay.length; i++) {
+                    var n = numbersToDisplay[i];
+                    context.fillText(n + "", 250, 250-i*50);
+                }
+                
+                
+                acc = (attempts==0)? 1: correct/attempts;
+              //  console.log(correct + " " + attempts)
+                context.fillText("Accuracy: " + Math.trunc(acc*100) + "%", 100, 400);
+                requestAnimationFrame(drawScreen);
+            }
+            fillNumbers();
+            drawScreen();
+        }
+        
+        function fillNumbers() {
+            var a = 0;
+            for (var i = 0; i < size; i++) {
+                var b = nums[Math.floor(Math.random()*(10))];
+                while (a == b) {
+                    b = nums[Math.floor(Math.random()*(10))];
+                }
+                numbersToDisplay[i] = b;
+            }
+        }
+        
+        
+        function keyUp(e) {
+            keys[e.keyCode] = true;
+            var n1 = numbersToDisplay[0];
+            down = true;
+            if (keys[49] || keys[97]) {
+                if (n1 == 1) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[50] || keys[98]) {
+                if (n1 == 2) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[51] || keys[99]) {
+                if (n1 == 3) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[52] || keys[100]){
+                if (n1 == 4) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[53] || keys[101]) {
+                if (n1 == 5) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[54] || keys[102]) {
+                if (n1 == 6) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[55] || keys[103]){
+                if (n1 == 7) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[56] || keys[104]) {
+                if (n1 == 8) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[57] || keys[105]) {
+                if (n1 == 9) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            } else if (keys[48] || keys[96]) {
+                if (n1 == 0) {
+                    numbersToDisplay.shift();
+                    correct++;
+                }
+                attempts++;
+            }   
+            keys[e.keyCode] = false;
+        }
+        
+    </script>
+    
+    <canvas id="canvas" height="500px" width="500px" style="border: 5px solid black">
+        
+    </canvas>
+</body>
+</html>

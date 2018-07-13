@@ -1,0 +1,71 @@
+<!DOCTYPE html> <html>
+<head>
+    
+</head>
+<body onload="init()">
+    <script>
+        var keys = [];
+        
+        var player1 = {
+            x:50,
+            y:100
+        }
+        
+        var player2 = {
+            x:50,
+            y:400
+        }
+
+        var img = new Image();
+        img.src = "ball.png";
+        
+        function init() {
+            var canvas = document.getElementById("canvas");
+            var context = canvas.getContext("2d");
+            
+            
+            window.addEventListener("keyup", keyUp);
+            
+            function drawScreen() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(img, player1.x, player1.y, 50, 50);
+                context.drawImage(img, player2.x, player2.y, 50, 50);
+                
+                context.beginPath();
+                context.moveTo(400, 0);
+                context.lineTo(400, 500);
+                context.stroke();
+                
+                if (player1.x >= 400) {
+                    console.log("P1 wins");
+                }
+                if (player2.x >= 400) {
+                    console.log("P2 wins");
+                }
+                
+                requestAnimationFrame(drawScreen);
+            }
+            drawScreen();
+        }
+        
+        
+        
+        function keyUp(e) {
+            keys[e.keyCode] = true;
+            console.log(e.keyCode);
+            if (e.keyCode == 65) {
+                player1.x += 2;
+            }
+            
+            if (e.keyCode == 76) {
+                player2.x += 2;
+            }
+        }
+        
+    </script>
+    
+    <canvas id="canvas" height="500px" width="500px" style="border: 5px solid black">
+        
+    </canvas>
+</body>
+</html>
