@@ -32,7 +32,7 @@
     }
     
 </style>
-
+	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.2.0/firebase.js"></script>
 <script src="PlatformJS/FirebaseJS.js"></script>
 <script src="PlatformJS/PlatformMaps.js"></script>
@@ -126,7 +126,9 @@ var leftTimer, rightTimer, upTimer;
 function init() {
     document.getElementById("myCanvas").addEventListener("mousemove", mouseMove);
 	document.getElementById("myCanvas").addEventListener("mousedown", mouseDown);
-    
+   	 $(document).bind("contextmenu",function(e) {
+	 e.preventDefault();
+	});
     
     onTick();
     perSec();
@@ -745,7 +747,7 @@ function rightReleased() {
 }
 </script>
 </head>
-<body onload="init()" > 
+<body oncontextmenu="return false" onkeydown="return false;" onmousedown="return false;" onload="init()">
 
 
 <table>
